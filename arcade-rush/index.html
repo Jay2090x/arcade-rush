@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0e27">
+  <meta name="description" content="Arcade Rush — Kostenlose Mini-Spiele. Sky Drift, Goldgräber Saga & Neon Stack.">
+  <title>Arcade Rush</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/hub.css">
+</head>
+<body>
+  <div class="hub">
+    <header class="hero">
+      <div class="hero-badge" id="hero-badge" title="">ARCADE</div>
+      <h1>Arcade Rush</h1>
+      <p class="hero-sub">Kostenlos spielen. Kein Download. Einfach tippen & los.</p>
+      <div class="hero-stats" id="live-stats">
+        <div class="stat-pill">🌍 <span data-global-visits id="stat-visits">–</span> Besuche (global)</div>
+        <div class="stat-pill">🎮 <span data-global-starts id="stat-plays">–</span> Spiele (global)</div>
+      </div>
+    </header>
+
+    <section class="games">
+      <a class="game-card featured" href="games/sky-drift/" data-game="sky-drift">
+        <div class="card-visual sky">
+          <span class="card-emoji">🐦</span>
+        </div>
+        <div class="card-info">
+          <h2>Sky Drift</h2>
+          <p>Flappy-Style — fliege durch die Rohre!</p>
+          <span class="card-tag">Süchtig machend</span>
+        </div>
+        <span class="card-play">▶</span>
+      </a>
+
+      <a class="game-card" href="games/goldgraeber/" data-game="goldgraeber">
+        <div class="card-visual gold">
+          <span class="card-emoji">⛏️</span>
+        </div>
+        <div class="card-info">
+          <h2>Goldgräber Saga</h2>
+          <p>Baue dein Bergwerk auf — Idle & Klick!</p>
+          <span class="card-tag">Strategie</span>
+        </div>
+        <span class="card-play">▶</span>
+      </a>
+
+      <a class="game-card" href="games/neon-stack/" data-game="neon-stack">
+        <div class="card-visual stack">
+          <span class="card-emoji">🧱</span>
+        </div>
+        <div class="card-info">
+          <h2>Neon Stack</h2>
+          <p>Perfekt stapeln — wie hoch kommst du?</p>
+          <span class="card-tag">Süchtig machend</span>
+        </div>
+        <span class="card-play">▶</span>
+      </a>
+    </section>
+
+    <footer class="hub-footer">
+      <p>Arcade Rush © 2026 · Made in Austria 🇦🇹</p>
+      <p class="legal-note"><a href="datenschutz.html">Datenschutz</a></p>
+    </footer>
+  </div>
+
+  <script src="js/analytics.js"></script>
+  <script src="js/hub.js"></script>
+</body>
+</html>

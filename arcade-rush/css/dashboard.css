@@ -1,0 +1,100 @@
+:root {
+  --bg: #0a0e27;
+  --card: #141b3d;
+  --text: #f0f0f5;
+  --muted: #8888aa;
+  --green: #4ade80;
+  --yellow: #ffc107;
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.dash { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.back { color: #a29bfe; text-decoration: none; font-size: 0.85rem; }
+header h1 { font-size: 1.6rem; margin-top: 12px; }
+.sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.kpi {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.kpi.highlight { border: 1px solid rgba(255,193,7,0.3); background: rgba(255,193,7,0.05); }
+
+.kpi-val {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--yellow);
+}
+
+.kpi-label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; display: block; }
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card h2 { font-size: 1rem; margin-bottom: 12px; }
+
+.checklist .check {
+  padding: 8px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.check.ok { color: var(--green); }
+
+.verdict {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.verdict.wait { background: rgba(255,193,7,0.1); color: var(--yellow); }
+.verdict.go { background: rgba(74,222,128,0.15); color: var(--green); }
+
+.matrix { width: 100%; font-size: 0.82rem; border-collapse: collapse; }
+.matrix th, .matrix td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.matrix .go { color: var(--green); font-weight: 700; }
+
+.steps { padding-left: 20px; font-size: 0.88rem; line-height: 1.8; color: var(--muted); }
+.steps strong { color: var(--text); }
+
+.hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+
+.btn {
+  padding: 10px 20px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 8px;
+  margin-top: 4px;
+}
+
+.btn-secondary { background: #333; }
+
+.legal ul { font-size: 0.85rem; color: var(--muted); line-height: 1.7; padding-left: 18px; }
+.legal strong { color: var(--text); }

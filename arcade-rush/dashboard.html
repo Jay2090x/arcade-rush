@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Rush — Stats</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="dash">
+    <header>
+      <a href="index.html" class="back">← Arcade Rush</a>
+      <h1>📊 Statistik</h1>
+      <p class="sub">Anonyme Spielzahlen · lokal & global</p>
+    </header>
+
+    <section class="kpi-grid" id="kpis"></section>
+
+    <section class="card">
+      <h2>📈 Übersicht</h2>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <section class="card">
+      <h2>📤 Daten</h2>
+      <p class="hint">Alle Daten anonym, gespeichert im Browser.</p>
+      <button class="btn" id="btn-export">JSON exportieren</button>
+      <button class="btn btn-secondary" id="btn-reset">Daten zurücksetzen</button>
+    </section>
+  </div>
+
+  <script src="js/analytics.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

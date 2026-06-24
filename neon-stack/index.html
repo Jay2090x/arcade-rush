@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e27">
+  <title>Neon Stack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <div class="hud" id="hud">
+      <div class="score-wrap">
+        <span class="score-label">HÖHE</span>
+        <span id="score">0</span>
+        <span id="combo"></span>
+      </div>
+    </div>
+
+    <div class="overlay active" id="menu-screen">
+      <div class="logo-wrap">
+        <div class="logo-stack">🧱</div>
+        <h1>Neon Stack</h1>
+        <p class="tagline">Perfekt stapeln. Nicht abstürzen.</p>
+      </div>
+      <button class="btn-play" id="btn-play">Tippen zum Start</button>
+      <div class="menu-stats">
+        <div class="stat"><span>Rekord</span><strong id="menu-best">0</strong></div>
+        <div class="stat"><span>Spiele</span><strong id="menu-games">0</strong></div>
+      </div>
+      <p class="hint">Tippe / Klicke zum Ablegen</p>
+      <a href="../../index.html" class="back-arcade">← Alle Spiele</a>
+    </div>
+
+    <div class="overlay" id="gameover-screen">
+      <div class="go-card">
+        <h2>Turm eingestürzt!</h2>
+        <div class="go-score" id="go-score">0</div>
+        <div class="go-stats">
+          <div><span>Rekord</span><strong id="go-best">0</strong></div>
+          <div><span>Best Combo</span><strong id="go-combo">0</strong></div>
+        </div>
+        <div class="go-new-record" id="go-new-record">🎉 Neuer Rekord!</div>
+        <button class="btn-play btn-retry" id="btn-retry">Nochmal</button>
+      </div>
+    </div>
+
+    <button class="btn-sound" id="btn-sound" title="Sound">🔊</button>
+  </div>
+
+  <script src="../../js/analytics.js" onerror="void 0"></script>
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

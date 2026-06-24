@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a0f08">
+  <meta name="description" content="Goldgräber Saga – Baue dein Bergwerk-Imperium auf und werde zum Gold-Tycoon!">
+  <title>Goldgräber Saga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Splash Screen -->
+    <div id="splash" class="screen active">
+      <div class="splash-content">
+        <div class="logo-glow"></div>
+        <div class="logo">
+          <svg viewBox="0 0 120 120" class="logo-icon">
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#FFE566"/>
+                <stop offset="50%" style="stop-color:#FFD700"/>
+                <stop offset="100%" style="stop-color:#B8860B"/>
+              </linearGradient>
+            </defs>
+            <polygon points="60,10 95,45 80,95 40,95 25,45" fill="url(#goldGrad)" stroke="#8B6914" stroke-width="2"/>
+            <polygon points="60,25 75,45 68,75 52,75 45,45" fill="#FFF8DC" opacity="0.6"/>
+          </svg>
+          <h1>Goldgräber Saga</h1>
+          <p class="tagline">Baue dein Bergwerk-Imperium</p>
+        </div>
+        <div class="splash-loader">
+          <div class="loader-bar"><div class="loader-fill"></div></div>
+          <span id="load-text">Lade Bergwerk...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Game -->
+    <div id="game" class="screen">
+      <!-- Top HUD -->
+      <header class="hud">
+        <div class="hud-left">
+          <div class="currency gold-display" id="gold-display">
+            <svg class="coin-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FFD700"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="#8B6914" font-weight="bold">G</text></svg>
+            <span id="gold-amount">0</span>
+          </div>
+          <div class="currency gems-display" id="gems-display">
+            <svg class="gem-icon" viewBox="0 0 24 24"><polygon points="12,2 22,9 12,22 2,9" fill="#7B68EE" stroke="#9370DB" stroke-width="1"/></svg>
+            <span id="gems-amount">0</span>
+          </div>
+        </div>
+        <div class="hud-center">
+          <div class="depth-badge">
+            <span class="depth-label">Tiefe</span>
+            <span id="depth-level">Ebene 1</span>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="income-rate" id="income-rate">
+            <span class="rate-value">+0/s</span>
+          </div>
+          <button class="icon-btn" id="btn-settings" title="Einstellungen">
+            <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.08-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.61-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Boost Bar -->
+      <div class="boost-bar" id="boost-bar">
+        <button class="boost-btn" id="btn-boost">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/></svg>
+          <span>2× Boost</span>
+          <small id="boost-timer"></small>
+        </button>
+        <div class="boost-progress" id="boost-progress"></div>
+      </div>
+
+      <!-- Mine Canvas Area -->
+      <main class="mine-area">
+        <canvas id="mine-canvas"></canvas>
+        <div class="mine-overlay">
+          <div class="vein-hp-bar" id="vein-hp-bar">
+            <div class="vein-hp-fill" id="vein-hp-fill"></div>
+            <span class="vein-hp-text" id="vein-hp-text">100%</span>
+          </div>
+          <button class="tap-zone" id="tap-zone" aria-label="Gold abbauen">
+            <div class="gold-vein-visual" id="gold-vein-visual">
+              <div class="vein-aura"></div>
+              <div class="vein-rays"></div>
+              <div class="rock-base"></div>
+              <div class="crystal-cluster">
+                <div class="crystal crystal-main"></div>
+                <div class="crystal crystal-left"></div>
+                <div class="crystal crystal-right"></div>
+                <div class="crystal crystal-back"></div>
+                <div class="crystal crystal-chip c1"></div>
+                <div class="crystal crystal-chip c2"></div>
+                <div class="crystal crystal-chip c3"></div>
+              </div>
+              <div class="gold-spark spark-1"></div>
+              <div class="gold-spark spark-2"></div>
+              <div class="gold-spark spark-3"></div>
+              <div class="gold-spark spark-4"></div>
+              <div class="gold-spark spark-5"></div>
+              <div class="gold-spark spark-6"></div>
+              <div class="vein-shine"></div>
+              <div class="vein-crack vein-crack-1"></div>
+              <div class="vein-crack vein-crack-2"></div>
+              <div class="vein-crack vein-crack-3"></div>
+              <div class="impact-flash" id="impact-flash"></div>
+            </div>
+            <div class="combo-display" id="combo-display"></div>
+            <div class="tap-hint" id="tap-hint">👆 Hier tippen für Gold!</div>
+          </button>
+          <div id="tap-ripples"></div>
+        </div>
+        <div id="floating-numbers"></div>
+        <div id="worker-layer" class="worker-layer"></div>
+        <div class="event-banner" id="event-banner"></div>
+      </main>
+
+      <!-- Mission -->
+      <div class="mission-bar" id="mission-bar">
+        <div class="mission-icon" id="mission-icon">🎯</div>
+        <div class="mission-info">
+          <div class="mission-title" id="mission-title">Erstes Ziel</div>
+          <div class="mission-progress-wrap">
+            <div class="mission-progress-fill" id="mission-progress-fill"></div>
+          </div>
+        </div>
+        <div class="mission-reward" id="mission-reward">+50G</div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="activity-feed" id="activity-feed"></div>
+
+      <!-- Quick Buy -->
+      <div class="quick-buy" id="quick-buy">
+        <button class="quick-buy-btn" id="quick-buy-btn" type="button">
+          <span class="qb-icon" id="qb-icon">👷</span>
+          <span class="qb-text">
+            <strong id="qb-name">Lehrling anheuern</strong>
+            <small id="qb-desc">+0.8 Gold/Sekunde — Amortisation ~4 Min</small>
+          </span>
+          <span class="qb-cost" id="qb-cost">200 G</span>
+        </button>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-btn" data-panel="miners">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/></svg>
+          <span>Minen</span>
+        </button>
+        <button class="nav-btn" data-panel="upgrades">
+          <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Upgrades</span>
+        </button>
+        <button class="nav-btn" data-panel="shop">
+          <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/></svg>
+          <span>Shop</span>
+        </button>
+        <button class="nav-btn" data-panel="stats">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/></svg>
+          <span>Stats</span>
+        </button>
+      </nav>
+
+      <!-- Side Panels -->
+      <div class="panel-overlay" id="panel-overlay"></div>
+      
+      <aside class="side-panel" id="panel-miners">
+        <div class="panel-header">
+          <h2>⛏️ Bergleute</h2>
+          <button class="panel-close" data-close>&times;</button>
+        </div>
+        <div class="panel-content" id="miners-list"></div>
+      </aside>
+
+      <aside class="side-panel" id="panel-upgrades">
+        <div class="panel-header">
+          <h2>⚡ Upgrades</h2>
+          <button class="panel-close" data-close>&times;</button>
+        </div>
+        <div class="panel-content" id="upgrades-list"></div>
+      </aside>
+
+      <aside class="side-panel" id="panel-shop">
+        <div class="panel-header">
+          <h2>💎 Premium Shop</h2>
+          <button class="panel-close" data-close>&times;</button>
+        </div>
+        <div class="panel-content" id="shop-list"></div>
+      </aside>
+
+      <aside class="side-panel" id="panel-stats">
+        <div class="panel-header">
+          <h2>📊 Statistiken</h2>
+          <button class="panel-close" data-close>&times;</button>
+        </div>
+        <div class="panel-content" id="stats-content"></div>
+      </aside>
+
+      <!-- Settings Modal -->
+      <div class="modal" id="modal-settings">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+          <h2>Einstellungen</h2>
+          <div class="setting-row">
+            <span>Soundeffekte</span>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-sound" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span>Partikeleffekte</span>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-particles" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span>Vibration</span>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-vibration" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button class="btn-danger" id="btn-reset">Fortschritt zurücksetzen</button>
+          <button class="btn-secondary modal-close">Schließen</button>
+        </div>
+      </div>
+
+      <!-- Offline Earnings Modal -->
+      <div class="modal" id="modal-offline">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content offline-modal">
+          <div class="offline-icon">💰</div>
+          <h2>Willkommen zurück!</h2>
+          <p>Deine Bergleute haben gearbeitet:</p>
+          <div class="offline-amount" id="offline-amount">+0 Gold</div>
+          <button class="btn-primary" id="btn-collect-offline">Einsammeln</button>
+          <button class="btn-boost-collect" id="btn-double-offline">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/></svg>
+            2× mit Video
+          </button>
+        </div>
+      </div>
+
+      <!-- Level Up Modal -->
+      <div class="modal" id="modal-levelup">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content levelup-modal">
+          <div class="levelup-burst"></div>
+          <h2>Neue Tiefe freigeschaltet!</h2>
+          <div class="new-depth" id="new-depth-name">Ebene 2</div>
+          <p id="new-depth-bonus">+50% Gold pro Schlag</p>
+          <button class="btn-primary modal-close">Weiter abbauen!</button>
+        </div>
+      </div>
+
+      <!-- Toast Notifications -->
+      <div id="toast-container"></div>
+    </div>
+  </div>
+
+  <script src="../../js/analytics.js" onerror="void 0"></script>
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

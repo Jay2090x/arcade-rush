@@ -1,0 +1,19 @@
+[build]
+  publish = "."
+  command = "bash scripts/prepare-deploy.sh"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/games/*/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
