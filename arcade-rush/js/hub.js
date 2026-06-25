@@ -1,10 +1,12 @@
 const ADMIN_KEY = 'arcade_admin_unlock';
 const ADMIN_TAPS = 5;
 const ADMIN_WINDOW_MS = 2500;
+const SHARE_URL = 'https://arcade-rush.netlify.app/';
 
 document.addEventListener('DOMContentLoaded', () => {
   HubI18n.init();
   ArcadeAnalytics.init();
+  initShare();
 
   setTimeout(() => {
     const s = ArcadeAnalytics.getSummary();
@@ -21,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const shareBtn = document.getElementById('btn-share');
-  if (shareBtn) HubI18n.bindButton(shareBtn, shareSite);
+  if (shareBtn) {
+    shareBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      shareSite();
+    });
+  }
 
   let adminTaps = 0;
   let adminTimer = null;
@@ -39,41 +46,84 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-async function shareSite() {
-  const url = 'https://arcade-rush.netlify.app/';
-  const payload = {
-    title: 'Arcade Rush',
-    text: HubI18n.t('share_text'),
-    url,
-  };
+function initShare() {
+  const modal = document.getElementById('share-modal');
+  const input = document.getElementById('share-url-input');
+  const wa = document.getElementById('share-whatsapp');
+  if (!modal || !input) return;
 
-  try {
-    if (navigator.share) {
-      await navigator.share(payload);
-      return;
-    }
-  } catch (err) {
-    if (err?.name === 'AbortError') return;
-  }
+  input.value = SHARE_URL;
+  updateWhatsAppLink();
 
-  if (await copyToClipboard(url)) {
-    showShareToast(HubI18n.t('share_copied'));
-  } else {
-    window.prompt(HubI18n.t('share_copied'), url);
-  }
+  document.getElementById('share-modal-backdrop')?.addEventListener('click', closeShareModal);
+  document.getElementById('share-close')?.addEventListener('click', closeShareModal);
+  document.getElementById('share-copy')?.addEventListener('click', () => {
+    input.focus();
+    input.select();
+    input.setSelectionRange(0, SHARE_URL.length);
+    const ok = copySync(SHARE_URL);
+    showShareToast(ok ? HubI18n.t('share_copied') : HubI18n.t('share_failed'));
+  });
 }
 
-async function copyToClipboard(text) {
-  if (navigator.clipboard?.writeText) {
+function updateWhatsAppLink() {
+  const wa = document.getElementById('share-whatsapp');
+  if (!wa) return;
+  const msg = `${HubI18n.t('share_text')} ${SHARE_URL}`;
+  wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+}
+
+function shareSite() {
+  const url = SHARE_URL;
+  const data = { url };
+
+  if (navigator.share) {
+    const payload = navigator.canShare?.(data) ? data : { title: 'Arcade Rush', url };
+    navigator.share(payload).catch((err) => {
+      if (err?.name !== 'AbortError') openShareModal();
+    });
+    return;
+  }
+
+  openShareModal();
+}
+
+function openShareModal() {
+  updateWhatsAppLink();
+  const modal = document.getElementById('share-modal');
+  const input = document.getElementById('share-url-input');
+  if (!modal) return;
+  modal.hidden = false;
+  requestAnimationFrame(() => {
+    modal.classList.add('visible');
+    input?.focus();
+    input?.select();
+  });
+}
+
+function closeShareModal() {
+  const modal = document.getElementById('share-modal');
+  if (!modal) return;
+  modal.classList.remove('visible');
+  setTimeout(() => { modal.hidden = true; }, 250);
+}
+
+function copySync(text) {
+  const input = document.getElementById('share-url-input');
+  if (input) {
+    input.value = text;
+    input.focus();
+    input.select();
+    input.setSelectionRange(0, text.length);
     try {
-      await navigator.clipboard.writeText(text);
-      return true;
+      if (document.execCommand('copy')) return true;
     } catch (_) {}
   }
+
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.setAttribute('readonly', '');
-  ta.style.cssText = 'position:fixed;top:0;left:0;width:2em;height:2em;opacity:0';
+  ta.style.cssText = 'position:fixed;top:50%;left:50%;width:1px;height:1px;opacity:0';
   document.body.appendChild(ta);
   ta.focus();
   ta.select();

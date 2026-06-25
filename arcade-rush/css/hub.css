@@ -110,6 +110,109 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
+.share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.share-modal.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.share-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.share-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card);
+  border: 1px solid rgba(108, 92, 231, 0.35);
+  border-radius: 20px 20px 16px 16px;
+  padding: 22px 20px;
+  transform: translateY(20px);
+  transition: transform 0.25s;
+}
+
+.share-modal.visible .share-modal-card {
+  transform: translateY(0);
+}
+
+.share-modal-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.share-modal-hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.share-url-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+  -webkit-user-select: all;
+  user-select: all;
+}
+
+.share-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.share-action {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+
+.share-action.primary {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff;
+}
+
+.share-action.whatsapp {
+  background: #25d366;
+  color: #fff;
+}
+
+.share-action.ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .hero {
   text-align: center;
   margin-bottom: 32px;

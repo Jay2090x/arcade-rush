@@ -100,6 +100,20 @@
 
   <div class="share-toast" id="share-toast" hidden></div>
 
+  <div class="share-modal" id="share-modal" hidden>
+    <div class="share-modal-backdrop" id="share-modal-backdrop"></div>
+    <div class="share-modal-card">
+      <h3 data-i18n="share_title">Link teilen</h3>
+      <p class="share-modal-hint" data-i18n="share_hint">Link kopieren oder direkt weiterleiten:</p>
+      <input class="share-url-input" id="share-url-input" type="text" readonly value="https://arcade-rush.netlify.app/">
+      <div class="share-modal-actions">
+        <button type="button" class="share-action primary" id="share-copy" data-i18n="share_copy">Link kopieren</button>
+        <a class="share-action whatsapp" id="share-whatsapp" href="#" target="_blank" rel="noopener" data-i18n="share_whatsapp">WhatsApp</a>
+        <button type="button" class="share-action ghost" id="share-close" data-i18n="share_close">Schließen</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/i18n.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/hub.js"></script>

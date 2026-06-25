@@ -13,9 +13,14 @@ const HubI18n = {
       stack_desc: 'Stapel die Blöcke präzise — wie hoch kommst du?',
       stack_tag: 'Geschicklichkeit',
       share: 'Teilen',
+      share_title: 'Link teilen',
+      share_hint: 'Link kopieren oder direkt weiterleiten:',
+      share_copy: 'Link kopieren',
+      share_whatsapp: 'WhatsApp',
+      share_close: 'Schließen',
       share_text: 'Kostenlose Browser-Spiele — Sky Drift, Goldgräber & Neon Stack!',
       share_copied: 'Link kopiert!',
-      share_failed: 'Link konnte nicht kopiert werden',
+      share_failed: 'Tippe den Link oben an und wähle „Kopieren“',
       privacy: 'Datenschutz',
       footer: 'Arcade Rush © 2026 · Made in Austria 🇦🇹',
     },
@@ -30,9 +35,14 @@ const HubI18n = {
       stack_desc: 'Stack blocks with precision — how high can you go?',
       stack_tag: 'Skill',
       share: 'Share',
+      share_title: 'Share link',
+      share_hint: 'Copy the link or share directly:',
+      share_copy: 'Copy link',
+      share_whatsapp: 'WhatsApp',
+      share_close: 'Close',
       share_text: 'Free browser games — Sky Drift, Goldgräber & Neon Stack!',
       share_copied: 'Link copied!',
-      share_failed: 'Could not copy link',
+      share_failed: 'Tap the link above and choose Copy',
       privacy: 'Privacy',
       footer: 'Arcade Rush © 2026 · Made in Austria 🇦🇹',
     },
@@ -66,6 +76,7 @@ const HubI18n = {
       btn.classList.toggle('active', btn.dataset.lang === lang);
       btn.setAttribute('aria-pressed', btn.dataset.lang === lang ? 'true' : 'false');
     });
+    if (typeof updateWhatsAppLink === 'function') updateWhatsAppLink();
   },
 
   bindButton(el, handler) {
