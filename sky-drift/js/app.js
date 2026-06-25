@@ -32,11 +32,11 @@ const UI = {
     });
     const app = document.getElementById('app');
     app.addEventListener('click', (e) => {
-      if (e.target.closest('.btn-sound, .btn-play, .btn-retry')) return;
+      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-back-hub')) return;
       action();
     });
     app.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.btn-sound, .btn-play, .btn-retry')) return;
+      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-back-hub')) return;
       e.preventDefault();
       action();
     }, { passive: false });

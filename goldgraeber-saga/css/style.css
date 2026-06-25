@@ -278,6 +278,10 @@ html, body {
   color: var(--text-primary);
 }
 
+a.icon-btn {
+  text-decoration: none;
+}
+
 /* ─── Boost Bar ─── */
 .boost-bar {
   display: flex;
