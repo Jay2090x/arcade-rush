@@ -4,8 +4,8 @@ const HubI18n = {
   strings: {
     de: {
       hero_sub: 'Drei kostenlose Spiele — direkt im Browser, ohne App.',
-      stat_visits: 'Besuche (global)',
-      stat_plays: 'Spiele (global)',
+      stat_visits: 'Besuche (gesamt)',
+      stat_plays: 'Spiele (gesamt)',
       sky_desc: 'Fliege geschickt durch Wolken und Rohre.',
       sky_tag: 'Arcade',
       gold_desc: 'Klicke, baue auf, werde zum Bergbau-Tycoon.',
@@ -15,14 +15,14 @@ const HubI18n = {
       share: 'Teilen',
       share_text: 'Kostenlose Browser-Spiele — Sky Drift, Goldgräber & Neon Stack!',
       share_copied: 'Link kopiert!',
-      share_failed: 'Teilen nicht möglich',
+      share_failed: 'Link konnte nicht kopiert werden',
       privacy: 'Datenschutz',
       footer: 'Arcade Rush © 2026 · Made in Austria 🇦🇹',
     },
     en: {
       hero_sub: 'Three free games — play instantly in your browser, no app needed.',
-      stat_visits: 'Visits (global)',
-      stat_plays: 'Plays (global)',
+      stat_visits: 'Visits (total)',
+      stat_plays: 'Plays (total)',
       sky_desc: 'Glide through clouds and dodge the pipes.',
       sky_tag: 'Arcade',
       gold_desc: 'Tap, upgrade, and grow your mining empire.',
@@ -32,20 +32,22 @@ const HubI18n = {
       share: 'Share',
       share_text: 'Free browser games — Sky Drift, Goldgräber & Neon Stack!',
       share_copied: 'Link copied!',
-      share_failed: 'Could not share',
+      share_failed: 'Could not copy link',
       privacy: 'Privacy',
       footer: 'Arcade Rush © 2026 · Made in Austria 🇦🇹',
     },
   },
 
   getLang() {
-    const saved = localStorage.getItem(this.KEY);
-    if (saved === 'en' || saved === 'de') return saved;
+    try {
+      const saved = localStorage.getItem(this.KEY);
+      if (saved === 'en' || saved === 'de') return saved;
+    } catch (_) {}
     return navigator.language?.startsWith('de') ? 'de' : 'en';
   },
 
   setLang(lang) {
-    localStorage.setItem(this.KEY, lang);
+    try { localStorage.setItem(this.KEY, lang); } catch (_) {}
     this.apply(lang);
   },
 
@@ -60,20 +62,31 @@ const HubI18n = {
       const key = el.dataset.i18n;
       if (s[key] != null) el.textContent = s[key];
     });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-      const key = el.dataset.i18nPlaceholder;
-      if (s[key] != null) el.placeholder = s[key];
-    });
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.lang === lang);
+      btn.setAttribute('aria-pressed', btn.dataset.lang === lang ? 'true' : 'false');
     });
+  },
+
+  bindButton(el, handler) {
+    let lastTap = 0;
+    const run = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - lastTap < 400) return;
+      lastTap = now;
+      handler(e);
+    };
+    el.addEventListener('click', run);
+    el.addEventListener('touchend', run, { passive: false });
   },
 
   init() {
     const lang = this.getLang();
     this.apply(lang);
     document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => this.setLang(btn.dataset.lang));
+      this.bindButton(btn, () => this.setLang(btn.dataset.lang));
     });
   },
 };

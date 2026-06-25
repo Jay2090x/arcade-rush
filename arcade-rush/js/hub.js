@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('btn-share')?.addEventListener('click', shareSite);
+  const shareBtn = document.getElementById('btn-share');
+  if (shareBtn) HubI18n.bindButton(shareBtn, shareSite);
 
   let adminTaps = 0;
   let adminTimer = null;
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function shareSite() {
-  const url = location.href.replace(/\/$/, '') + '/';
+  const url = 'https://arcade-rush.netlify.app/';
   const payload = {
     title: 'Arcade Rush',
     text: HubI18n.t('share_text'),
@@ -51,17 +52,36 @@ async function shareSite() {
       await navigator.share(payload);
       return;
     }
-    await navigator.clipboard.writeText(url);
-    showShareToast(HubI18n.t('share_copied'));
   } catch (err) {
     if (err?.name === 'AbortError') return;
-    try {
-      await navigator.clipboard.writeText(url);
-      showShareToast(HubI18n.t('share_copied'));
-    } catch {
-      showShareToast(HubI18n.t('share_failed'));
-    }
   }
+
+  if (await copyToClipboard(url)) {
+    showShareToast(HubI18n.t('share_copied'));
+  } else {
+    window.prompt(HubI18n.t('share_copied'), url);
+  }
+}
+
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {}
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:2em;height:2em;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, text.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (_) {}
+  document.body.removeChild(ta);
+  return ok;
 }
 
 function showShareToast(msg) {

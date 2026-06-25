@@ -1,8 +1,8 @@
-/** Arcade Rush — anonyme Spielstatistik (lokal + optional global) */
+/** Arcade Rush — anonyme Statistik (lokal + Netlify serverless) */
 const ArcadeAnalytics = {
   STORAGE_KEY: 'arcade_rush_analytics',
   SESSION_KEY: 'arcade_rush_session',
-  GLOBAL_NS: 'arcade-rush-at-test',
+  STATS_URL: '/.netlify/functions/stats',
   globalVisits: null,
   globalStarts: null,
 
@@ -25,20 +25,35 @@ const ArcadeAnalytics = {
   async fetchGlobalCounts() {
     try {
       const [v, s] = await Promise.all([
-        fetch(`https://api.countapi.xyz/get/${this.GLOBAL_NS}/visits`).then(r => r.json()),
-        fetch(`https://api.countapi.xyz/get/${this.GLOBAL_NS}/game-starts`).then(r => r.json()),
+        fetch(`${this.STATS_URL}?key=visits`).then(r => r.json()),
+        fetch(`${this.STATS_URL}?key=game-starts`).then(r => r.json()),
       ]);
       this.globalVisits = v.value ?? 0;
       this.globalStarts = s.value ?? 0;
-      document.querySelectorAll('[data-global-visits]').forEach(el => { el.textContent = this.globalVisits; });
-      document.querySelectorAll('[data-global-starts]').forEach(el => { el.textContent = this.globalStarts; });
-    } catch (_) {}
+      this.updateGlobalUI();
+    } catch (_) {
+      this.updateGlobalUI();
+    }
+  },
+
+  updateGlobalUI() {
+    const v = this.globalVisits;
+    const s = this.globalStarts;
+    document.querySelectorAll('[data-global-visits]').forEach(el => {
+      el.textContent = v != null ? v : '–';
+    });
+    document.querySelectorAll('[data-global-starts]').forEach(el => {
+      el.textContent = s != null ? s : '–';
+    });
   },
 
   async hitGlobal(key) {
     try {
-      await fetch(`https://api.countapi.xyz/hit/${this.GLOBAL_NS}/${key}`);
-      this.fetchGlobalCounts();
+      const res = await fetch(`${this.STATS_URL}?key=${encodeURIComponent(key)}`, { method: 'POST' });
+      const data = await res.json();
+      if (key === 'visits') this.globalVisits = data.value ?? this.globalVisits;
+      if (key === 'game-starts') this.globalStarts = data.value ?? this.globalStarts;
+      this.updateGlobalUI();
     } catch (_) {}
   },
 
@@ -73,7 +88,9 @@ const ArcadeAnalytics = {
   },
 
   save() {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+    } catch (_) {}
   },
 
   track(event, props = {}) {
@@ -112,14 +129,6 @@ const ArcadeAnalytics = {
     this.data.events.push(entry);
     if (this.data.events.length > 500) this.data.events = this.data.events.slice(-500);
     this.save();
-    this.sendRemote(entry);
-  },
-
-  sendRemote(entry) {
-    if (!this.API_URL) return;
-    try {
-      navigator.sendBeacon?.(this.API_URL, JSON.stringify(entry));
-    } catch (_) {}
   },
 
   flush() {

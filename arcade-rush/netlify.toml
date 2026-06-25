@@ -1,6 +1,10 @@
 [build]
   publish = "."
-  command = "bash scripts/prepare-deploy.sh"
+  command = "npm install && bash scripts/prepare-deploy.sh"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[headers]]
   for = "/*"

@@ -12,6 +12,9 @@ const UI = {
     Game.onScore = (score) => {
       this.els.score.textContent = score;
       this.els.combo.textContent = Game.combo > 1 ? `×${Game.combo}` : '';
+      if (this.els['hud-best'] && score > Game.stats.best) {
+        this.els['hud-best'].textContent = score;
+      }
     };
 
     document.getElementById('btn-play').addEventListener('click', (e) => { e.stopPropagation(); Game.play(); });

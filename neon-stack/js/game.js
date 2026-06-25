@@ -25,13 +25,13 @@ const Game = {
 
   load() {
     try {
-      const s = localStorage.getItem(CONFIG.SAVE_KEY);
+      const s = Storage.get(CONFIG.SAVE_KEY);
       if (s) this.stats = { ...this.stats, ...JSON.parse(s) };
     } catch (_) {}
   },
 
   save() {
-    localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(this.stats));
+    Storage.set(CONFIG.SAVE_KEY, JSON.stringify(this.stats));
   },
 
   start() {
