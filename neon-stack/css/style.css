@@ -43,9 +43,9 @@ html, body {
   left: 0;
   right: 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-start;
-  padding: 20px;
+  padding: 16px 20px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s;
@@ -54,8 +54,35 @@ html, body {
 
 .hud.visible { opacity: 1; }
 
+.hud-side {
+  width: 72px;
+  flex-shrink: 0;
+}
+
 .score-wrap {
   text-align: center;
+  flex: 1;
+}
+
+.best-hud {
+  width: 72px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-top: 2px;
+}
+
+.best-label {
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+#hud-best {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffd54f;
+  text-shadow: 0 0 12px rgba(255, 213, 79, 0.35);
+  vertical-align: middle;
+  margin-left: 2px;
 }
 
 .score-label {

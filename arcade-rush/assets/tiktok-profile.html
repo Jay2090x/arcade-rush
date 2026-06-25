@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1080px;
+      height: 1080px;
+      background: #0a0e27;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', system-ui, sans-serif;
+      overflow: hidden;
+    }
+    .bg-glow-1 {
+      position: absolute;
+      width: 700px; height: 700px;
+      top: -120px; left: -80px;
+      background: radial-gradient(circle, rgba(108,92,231,0.35) 0%, transparent 70%);
+    }
+    .bg-glow-2 {
+      position: absolute;
+      width: 600px; height: 600px;
+      bottom: -100px; right: -60px;
+      background: radial-gradient(circle, rgba(255,193,7,0.2) 0%, transparent 70%);
+    }
+    .card {
+      position: relative;
+      width: 880px;
+      height: 880px;
+      border-radius: 48px;
+      background: linear-gradient(145deg, #141b3d 0%, #1a1040 50%, #141b3d 100%);
+      border: 3px solid rgba(108,92,231,0.5);
+      box-shadow:
+        0 0 80px rgba(108,92,231,0.4),
+        0 0 120px rgba(224,64,251,0.15),
+        inset 0 0 60px rgba(108,92,231,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .icons {
+      display: flex;
+      gap: 28px;
+      font-size: 88px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+    }
+    .title {
+      font-size: 108px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 40%, #ffc107 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      line-height: 1;
+      filter: drop-shadow(0 0 30px rgba(108,92,231,0.5));
+    }
+    .subtitle {
+      font-size: 42px;
+      font-weight: 700;
+      color: #00e5ff;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(0,229,255,0.5);
+    }
+    .play {
+      margin-top: 12px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffe082, #ffc107);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 40px rgba(255,193,7,0.5);
+    }
+    .play::after {
+      content: '';
+      margin-left: 10px;
+      border: 28px solid transparent;
+      border-left: 44px solid #0a0e27;
+      border-right: 0;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="card">
+    <div class="icons">🐦 ⛏️ 🧱</div>
+    <div class="title">Arcade<br>Rush</div>
+    <div class="subtitle">GRATIS SPIELEN</div>
+    <div class="play"></div>
+  </div>
+</body>
+</html>

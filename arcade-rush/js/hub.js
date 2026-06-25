@@ -3,6 +3,7 @@ const ADMIN_TAPS = 5;
 const ADMIN_WINDOW_MS = 2500;
 
 document.addEventListener('DOMContentLoaded', () => {
+  HubI18n.init();
   ArcadeAnalytics.init();
 
   setTimeout(() => {
@@ -19,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.getElementById('btn-share')?.addEventListener('click', shareSite);
+
   let adminTaps = 0;
   let adminTimer = null;
   const badge = document.getElementById('hero-badge');
@@ -34,3 +37,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+async function shareSite() {
+  const url = location.href.replace(/\/$/, '') + '/';
+  const payload = {
+    title: 'Arcade Rush',
+    text: HubI18n.t('share_text'),
+    url,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(payload);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    showShareToast(HubI18n.t('share_copied'));
+  } catch (err) {
+    if (err?.name === 'AbortError') return;
+    try {
+      await navigator.clipboard.writeText(url);
+      showShareToast(HubI18n.t('share_copied'));
+    } catch {
+      showShareToast(HubI18n.t('share_failed'));
+    }
+  }
+}
+
+function showShareToast(msg) {
+  const toast = document.getElementById('share-toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.hidden = false;
+  toast.classList.add('visible');
+  clearTimeout(showShareToast._t);
+  showShareToast._t = setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => { toast.hidden = true; }, 300);
+  }, 2200);
+}

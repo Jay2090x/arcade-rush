@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1080px;
+      height: 1080px;
+      background: #050508;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bloom {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 640px; height: 640px;
+      transform: translate(-50%, -52%);
+      background: radial-gradient(circle,
+        rgba(108,92,231,0.22) 0%,
+        rgba(108,92,231,0.08) 35%,
+        transparent 68%);
+      filter: blur(2px);
+    }
+
+    .bloom-2 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle,
+        rgba(0,229,255,0.12) 0%,
+        transparent 70%);
+      transform: translate(-48%, -55%);
+    }
+
+    .core {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 200px; height: 200px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%,
+        rgba(162,155,254,0.5) 0%,
+        rgba(108,92,231,0.15) 40%,
+        rgba(5,5,8,0) 72%);
+      box-shadow: 0 0 80px rgba(108,92,231,0.2);
+    }
+
+    .ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(162,155,254,0.18);
+    }
+    .r1 { width: 320px; height: 320px; }
+    .r2 {
+      width: 440px; height: 440px;
+      border-color: rgba(108,92,231,0.08);
+      transform: translate(-50%, -50%) rotate(12deg);
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, transparent 25%, rgba(0,0,0,0.7) 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="bloom"></div>
+  <div class="bloom bloom-2"></div>
+  <div class="ring r2"></div>
+  <div class="ring r1"></div>
+  <div class="core"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</body>
+</html>

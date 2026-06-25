@@ -17,7 +17,7 @@
   <meta property="og:locale" content="de_AT">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Arcade Rush — Kostenlose Mini-Spiele">
-  <meta name="twitter:description" content="3 süchtig machende Browser-Spiele. Kostenlos spielen!">
+  <meta name="twitter:description" content="3 kostenlose Browser-Spiele. Sofort spielen — kein Download nötig.">
   <title>Arcade Rush — Kostenlose Browser-Spiele</title>
   <script type="application/ld+json">
   {
@@ -36,13 +36,21 @@
 </head>
 <body>
   <div class="hub">
+    <div class="hub-toolbar">
+      <div class="lang-switch">
+        <button type="button" class="lang-btn active" data-lang="de" aria-label="Deutsch">DE</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-label="English">EN</button>
+      </div>
+      <button type="button" class="btn-share" id="btn-share" data-i18n="share">Teilen</button>
+    </div>
+
     <header class="hero">
       <div class="hero-badge" id="hero-badge" title="">ARCADE</div>
       <h1>Arcade Rush</h1>
-      <p class="hero-sub">Kostenlos spielen. Kein Download. Einfach tippen & los.</p>
+      <p class="hero-sub" data-i18n="hero_sub">Drei kostenlose Spiele — direkt im Browser, ohne App.</p>
       <div class="hero-stats" id="live-stats">
-        <div class="stat-pill">🌍 <span data-global-visits id="stat-visits">–</span> Besuche (global)</div>
-        <div class="stat-pill">🎮 <span data-global-starts id="stat-plays">–</span> Spiele (global)</div>
+        <div class="stat-pill">🌍 <span data-global-visits id="stat-visits">–</span> <span data-i18n="stat_visits">Besuche (global)</span></div>
+        <div class="stat-pill">🎮 <span data-global-starts id="stat-plays">–</span> <span data-i18n="stat_plays">Spiele (global)</span></div>
       </div>
     </header>
 
@@ -53,8 +61,8 @@
         </div>
         <div class="card-info">
           <h2>Sky Drift</h2>
-          <p>Flappy-Style — fliege durch die Rohre!</p>
-          <span class="card-tag">Süchtig machend</span>
+          <p data-i18n="sky_desc">Fliege geschickt durch Wolken und Rohre.</p>
+          <span class="card-tag" data-i18n="sky_tag">Arcade</span>
         </div>
         <span class="card-play">▶</span>
       </a>
@@ -65,8 +73,8 @@
         </div>
         <div class="card-info">
           <h2>Goldgräber Saga</h2>
-          <p>Baue dein Bergwerk auf — Idle & Klick!</p>
-          <span class="card-tag">Strategie</span>
+          <p data-i18n="gold_desc">Klicke, baue auf, werde zum Bergbau-Tycoon.</p>
+          <span class="card-tag" data-i18n="gold_tag">Strategie</span>
         </div>
         <span class="card-play">▶</span>
       </a>
@@ -77,19 +85,22 @@
         </div>
         <div class="card-info">
           <h2>Neon Stack</h2>
-          <p>Perfekt stapeln — wie hoch kommst du?</p>
-          <span class="card-tag">Süchtig machend</span>
+          <p data-i18n="stack_desc">Stapel die Blöcke präzise — wie hoch kommst du?</p>
+          <span class="card-tag" data-i18n="stack_tag">Geschicklichkeit</span>
         </div>
         <span class="card-play">▶</span>
       </a>
     </section>
 
     <footer class="hub-footer">
-      <p>Arcade Rush © 2026 · Made in Austria 🇦🇹</p>
-      <p class="legal-note"><a href="datenschutz.html">Datenschutz</a></p>
+      <p data-i18n="footer">Arcade Rush © 2026 · Made in Austria 🇦🇹</p>
+      <p class="legal-note"><a href="datenschutz.html" data-i18n="privacy">Datenschutz</a></p>
     </footer>
   </div>
 
+  <div class="share-toast" id="share-toast" hidden></div>
+
+  <script src="js/i18n.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/hub.js"></script>
 </body>

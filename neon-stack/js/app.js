@@ -2,7 +2,7 @@ const UI = {
   els: {},
 
   init() {
-    ['menu-screen', 'gameover-screen', 'hud', 'score', 'combo', 'menu-best', 'menu-games',
+    ['menu-screen', 'gameover-screen', 'hud', 'score', 'combo', 'hud-best', 'menu-best', 'menu-games',
       'go-score', 'go-best', 'go-combo', 'go-new-record', 'btn-play', 'btn-retry', 'btn-sound'
     ].forEach(id => { this.els[id] = document.getElementById(id); });
 
@@ -43,6 +43,7 @@ const UI = {
     const { best, games } = Game.stats;
     this.els['menu-best'].textContent = best;
     this.els['menu-games'].textContent = games;
+    if (this.els['hud-best']) this.els['hud-best'].textContent = best;
   },
 
   hideAll() {
@@ -61,6 +62,7 @@ const UI = {
         this.els.hud.classList.add('visible');
         this.els.score.textContent = '0';
         this.els.combo.textContent = '';
+        this.updateStats();
         break;
       case 'dead':
         this.show('gameover-screen');

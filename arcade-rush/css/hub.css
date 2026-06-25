@@ -26,6 +26,80 @@ body {
   padding: 24px 16px 40px;
 }
 
+.hub-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.lang-switch {
+  display: flex;
+  gap: 4px;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 3px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.lang-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-btn.active {
+  background: rgba(108, 92, 231, 0.35);
+  color: #a29bfe;
+}
+
+.btn-share {
+  padding: 6px 16px;
+  border: 1px solid rgba(108, 92, 231, 0.35);
+  border-radius: 20px;
+  background: rgba(108, 92, 231, 0.15);
+  color: #a29bfe;
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-share:hover { background: rgba(108, 92, 231, 0.28); }
+.btn-share:active { transform: scale(0.96); }
+
+.share-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  padding: 12px 22px;
+  background: var(--card);
+  border: 1px solid rgba(108, 92, 231, 0.4);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.share-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .hero {
   text-align: center;
   margin-bottom: 32px;
