@@ -35,6 +35,52 @@ class Renderer {
     this.groundY = this.h - CONFIG.GROUND_H;
   }
 
+  drawClassicBall(r) {
+    const ctx = this.ctx;
+    const g = ctx.createRadialGradient(-r * 0.32, -r * 0.32, r * 0.08, 0, 0, r);
+    g.addColorStop(0, '#FFFFFF');
+    g.addColorStop(0.75, '#F2F2F2');
+    g.addColorStop(1, '#C4C4C4');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    const pent = (x, y, rot, size) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.fillStyle = '#141414';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+        const px = Math.cos(a) * size;
+        const py = Math.sin(a) * size;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+
+    pent(0, 0, 0.15, r * 0.34);
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+      pent(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5, a + 0.5, r * 0.25);
+    }
+    pent(0, -r * 0.7, 0, r * 0.19);
+    pent(0, r * 0.74, Math.PI, r * 0.17);
+    pent(-r * 0.62, r * 0.2, 0.8, r * 0.15);
+    pent(r * 0.62, r * 0.2, -0.8, r * 0.15);
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.14)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, 0, r - 0.5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
   drawCheckerRect(x, y, width, height, cell, c1, c2) {
     const ctx = this.ctx;
     const cols = Math.ceil(width / cell);
@@ -280,7 +326,11 @@ class Renderer {
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.clip();
-    this.drawCheckerRect(-r, -r, r * 2, r * 2, CONFIG.CHECKER_CELL, skin.c1, skin.c2);
+    if (ballId === 'ball_default') {
+      this.drawClassicBall(r);
+    } else {
+      this.drawCheckerRect(-r, -r, r * 2, r * 2, CONFIG.CHECKER_CELL, skin.c1, skin.c2);
+    }
     ctx.strokeStyle = 'rgba(0,0,0,0.2)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
