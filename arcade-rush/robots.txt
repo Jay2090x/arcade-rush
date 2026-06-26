@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dashboard.html
 
-Sitemap: https://arcade-rush.netlify.app/sitemap.xml
+Sitemap: http://localhost:8888/sitemap.xml

@@ -3,10 +3,7 @@ const HubI18n = {
 
   strings: {
     de: {
-      hero_sub: 'Fünf kostenlose Spiele — direkt im Browser, ohne App.',
-      zen_name: 'Zen Rings',
-      zen_desc: 'Kreise in feinen Sand ziehen — pure Entspannung.',
-      zen_tag: 'Entspannung',
+      hero_sub: 'Vier kostenlose Spiele — direkt im Browser, ohne App.',
       vatreni_name: 'Vatreni Bro',
       vatreni_desc: 'Perfekt timen · Combos & Fever-Mode!',
       vatreni_tag: 'Neu · Kroatien 🇭🇷',
@@ -34,10 +31,7 @@ const HubI18n = {
       footer: 'Arcade Rush © 2026 · Made in Austria 🇦🇹',
     },
     en: {
-      hero_sub: 'Five free games — play instantly in your browser, no app needed.',
-      zen_name: 'Zen Rings',
-      zen_desc: 'Rake calming circles in fine sand — pure relaxation.',
-      zen_tag: 'Relaxation',
+      hero_sub: 'Four free games — play instantly in your browser, no app needed.',
       vatreni_name: 'Vatreni Bro',
       vatreni_desc: 'Perfect timing · combo fever. Reach 20!',
       vatreni_tag: 'New · Croatia 🇭🇷',

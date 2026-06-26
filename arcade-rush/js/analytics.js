@@ -39,7 +39,6 @@ const ArcadeAnalytics = {
     const keys = [
       'visits', 'game-starts',
       'game-vatreni-bro-visits', 'game-vatreni-bro-starts',
-      'game-zen-sand-visits', 'game-zen-sand-starts',
     ];
     try {
       const results = await Promise.all(keys.map(k => this.fetchStat(k).catch(() => null)));
@@ -50,10 +49,6 @@ const ArcadeAnalytics = {
         'vatreni-bro': {
           visits: map['game-vatreni-bro-visits'],
           starts: map['game-vatreni-bro-starts'],
-        },
-        'zen-sand': {
-          visits: map['game-zen-sand-visits'],
-          starts: map['game-zen-sand-starts'],
         },
       };
       this.updateGlobalUI();
@@ -199,13 +194,10 @@ const ArcadeAnalytics = {
     const stackStarts = d.gameStarts['neon-stack'] || 0;
     const vatreniStarts = d.gameStarts['vatreni-bro'] || 0;
     const vatreniVisits = d.gameVisits?.['vatreni-bro'] || 0;
-    const zenStarts = d.gameStarts['zen-sand'] || 0;
-    const zenVisits = d.gameVisits?.['zen-sand'] || 0;
     const skyScores = (d.gameOvers['sky-drift'] || []).map(g => g.score);
     const avgSky = skyScores.length ? (skyScores.reduce((a, b) => a + b, 0) / skyScores.length).toFixed(1) : '–';
     const daysSinceFirst = Math.max(1, Math.ceil((Date.now() - d.firstVisit) / 86400000));
     const vb = this.globalGameStats['vatreni-bro'] || {};
-    const zs = this.globalGameStats['zen-sand'] || {};
 
     return {
       visits: d.visits,
@@ -213,17 +205,13 @@ const ArcadeAnalytics = {
       globalStarts: this.globalStarts,
       globalVatreniVisits: vb.visits,
       globalVatreniStarts: vb.starts,
-      globalZenVisits: zs.visits,
-      globalZenStarts: zs.starts,
-      zenStarts,
-      zenVisits,
       uniqueSessions: unique,
       skyStarts,
       goldStarts,
       stackStarts,
       vatreniStarts,
       vatreniVisits,
-      totalStarts: skyStarts + goldStarts + stackStarts + vatreniStarts + zenStarts,
+      totalStarts: skyStarts + goldStarts + stackStarts + vatreniStarts,
       avgSkyScore: avgSky,
       totalPlayMin: Math.round(d.totalPlayTimeSec / 60),
       visitsPerDay: (d.visits / daysSinceFirst).toFixed(1),
