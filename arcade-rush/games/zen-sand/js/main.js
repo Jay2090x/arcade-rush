@@ -1,259 +1,253 @@
-/** Zen Rings — fresh build, video-style spinner */
 const SandApp = {
   canvas: null,
   ctx: null,
   sand: null,
   arm: null,
-  hub: null,
-  frame: null,
   btnPlay: null,
   mode: 'sand',
   running: false,
   angle: -Math.PI / 2,
-  prevAngle: -Math.PI / 2,
-  spinTotal: 0,
-  tray: { cx: 0, cy: 0, r: 0, left: 0, top: 0 },
+  prev: -Math.PI / 2,
+  spinAcc: 0,
+  tray: { cx: 0, cy: 0, r: 0 },
   drawing: false,
-  lastG: null,
-  animId: 0,
+  last: null,
+  timer: null,
+  sandBuf: null,
+  sandCtx: null,
+  playLock: 0,
 
-  init() {
+  boot() {
     this.canvas = document.getElementById('sand');
     this.ctx = this.canvas.getContext('2d', { alpha: false });
     this.arm = document.getElementById('spinner-arm');
-    this.hub = document.getElementById('spinner-hub');
-    this.frame = document.getElementById('tray-frame');
     this.btnPlay = document.getElementById('btn-play');
-    this.sand = new SandTray(200);
+    this.sand = new SandTray(160);
 
-    document.querySelectorAll('.tool').forEach(btn => {
-      btn.addEventListener('click', () => this.setMode(btn.dataset.mode));
+    this.sandBuf = document.createElement('canvas');
+    this.sandBuf.width = this.sand.N;
+    this.sandBuf.height = this.sand.N;
+    this.sandCtx = this.sandBuf.getContext('2d', { alpha: false });
+
+    document.querySelectorAll('.tool').forEach(b => {
+      b.addEventListener('click', () => this.setMode(b.dataset.mode));
     });
-    document.getElementById('btn-sound').addEventListener('click', () => {
+    document.getElementById('btn-sound').onclick = () => {
       const on = ZenAudio.toggle();
       document.getElementById('btn-sound').textContent = on ? '🔊' : '🔇';
-    });
+    };
 
-    this.canvas.addEventListener('pointerdown', e => this.onDown(e));
-    this.canvas.addEventListener('pointermove', e => this.onMove(e));
-    this.canvas.addEventListener('pointerup', () => this.onUp());
-    this.canvas.addEventListener('pointercancel', () => this.onUp());
-    window.addEventListener('resize', () => this.layout());
+    const play = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } this.togglePlay(); };
+    this.btnPlay.addEventListener('click', play);
+    this.btnPlay.addEventListener('touchend', play, { passive: false });
+
+    this.canvas.onpointerdown = (e) => this.down(e);
+    this.canvas.onpointermove = (e) => this.move(e);
+    this.canvas.onpointerup = () => this.up();
+    this.canvas.onpointercancel = () => this.up();
+    window.onresize = () => this.layout();
 
     ZenAudio.init();
     this.layout();
-    this.draw();
-    this.setArm(this.angle);
+    this.paint();
+    this.syncArm();
   },
 
   layout() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = innerWidth, h = innerHeight, dpr = Math.min(devicePixelRatio || 1, 2);
     this.canvas.width = w * dpr;
     this.canvas.height = h * dpr;
     this.canvas.style.width = w + 'px';
     this.canvas.style.height = h + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const r = Math.min(w, h) * 0.44;
-    this.tray = { cx: w / 2, cy: h / 2, r, left: w / 2 - r, top: h / 2 - r };
-
-    const size = r * 2;
-    this.frame.style.width = size + 'px';
-    this.frame.style.height = size + 'px';
-    this.draw();
-    this.setArm(this.angle);
+    this.tray = { cx: w / 2, cy: h / 2, r: Math.min(w, h) * 0.44 };
+    const frame = document.getElementById('tray-frame');
+    const sz = this.tray.r * 2;
+    frame.style.width = sz + 'px';
+    frame.style.height = sz + 'px';
+    this.paint();
+    this.syncArm();
   },
 
   setMode(m) {
-    if (this.running && m !== 'reset') return;
     if (m === 'reset') {
+      this.stop();
       this.sand.reset();
-      this.angle = -Math.PI / 2;
-      this.prevAngle = this.angle;
-      this.spinTotal = 0;
-      this.setArm(this.angle);
-      this.draw();
+      this.angle = this.prev = -Math.PI / 2;
+      this.spinAcc = 0;
+      this.syncArm();
+      this.paint();
       return;
     }
+    if (this.running) return;
     this.mode = m;
-    document.querySelectorAll('.tool').forEach(b => {
-      b.classList.toggle('active', b.dataset.mode === m);
-    });
+    document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
   },
 
-  setArm(a) {
-    const deg = (a * 180 / Math.PI) + 90;
+  syncArm() {
+    const deg = this.angle * 180 / Math.PI + 90;
     this.arm.style.transform = `rotate(${deg}deg)`;
   },
 
-  draw() {
-    const { ctx, tray, sand } = this;
-    const { left, top, r } = tray;
+  paint() {
+    const { ctx, tray, sand, sandBuf, sandCtx } = this;
+    const { cx, cy, r } = tray;
+
     ctx.fillStyle = '#111010';
-    ctx.fillRect(0, 0, tray.cx * 2, tray.cy * 2);
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 10;
-    ctx.beginPath();
-    ctx.arc(tray.cx, tray.cy, r + 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#1c1a18';
-    ctx.fill();
-    ctx.restore();
+    ctx.fillRect(0, 0, cx * 2, cy * 2);
 
     ctx.beginPath();
-    ctx.arc(tray.cx, tray.cy, r + 4, 0, Math.PI * 2);
-    ctx.strokeStyle = '#2a2622';
-    ctx.lineWidth = 8;
+    ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = '#2e2a26';
+    ctx.lineWidth = 10;
     ctx.stroke();
 
-    const off = document.createElement('canvas');
-    const oc = off.getContext('2d');
-    sand.draw(oc, tray);
+    sand.paint(sandCtx);
     ctx.save();
     ctx.beginPath();
-    ctx.arc(tray.cx, tray.cy, r, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.clip();
-    ctx.drawImage(off, left, top, r * 2, r * 2);
+    ctx.drawImage(sandBuf, cx - r, cy - r, r * 2, r * 2);
+    ctx.restore();
+
+    this.drawStick(ctx, cx, cy, r, this.angle);
+  },
+
+  drawStick(ctx, cx, cy, r, a) {
+    const ex = cx + Math.cos(a) * r * 0.95;
+    const ey = cy + Math.sin(a) * r * 0.95;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 8;
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#5a5048';
+    ctx.fill();
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const g = ctx.createLinearGradient(cx, cy, ex, ey);
+    g.addColorStop(0, '#6a6058');
+    g.addColorStop(0.4, '#c8c0b4');
+    g.addColorStop(0.55, '#fff');
+    g.addColorStop(1, '#7a7068');
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = g;
+    ctx.lineWidth = 5;
+    ctx.stroke();
     ctx.restore();
   },
 
-  pointer(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    const sx = e.clientX - rect.left;
-    const sy = e.clientY - rect.top;
-    return { sx, sy, ...this.sand.screenToGrid(sx, sy, this.tray) };
+  pt(e) {
+    const b = this.canvas.getBoundingClientRect();
+    const sx = e.clientX - b.left, sy = e.clientY - b.top;
+    return { sx, sy, ...this.sand.toGrid(sx, sy, this.tray) };
   },
 
-  onDown(e) {
+  down(e) {
     if (this.running) return;
     e.preventDefault();
     ZenAudio.ensure();
-    const p = this.pointer(e);
-
-    if (this.mode === 'stick' || this.hitStick(p)) {
+    const p = this.pt(e);
+    if (this.mode === 'stick') {
       this.drawing = true;
-      this.prevAngle = this.angle;
+      this.prev = this.angle;
       this.angle = Math.atan2(p.sy - this.tray.cy, p.sx - this.tray.cx);
-      this.sand.spin(this.angle, this.prevAngle);
-      this.setArm(this.angle);
-      this.draw();
+      this.sand.spin(this.angle, this.prev);
+      this.syncArm();
+      this.paint();
       return;
     }
-
     if (!p.ok) return;
     this.drawing = true;
-    this.lastG = p;
-    if (this.mode === 'sand') this.sand.pile(p.x, p.y);
-    this.draw();
+    this.last = p;
+    this.sand.pile(p.x, p.y);
+    this.paint();
   },
 
-  onMove(e) {
+  move(e) {
     if (!this.drawing || this.running) return;
     e.preventDefault();
-    const p = this.pointer(e);
-
-    if (this.mode === 'stick' || this.hitStick(p)) {
-      this.prevAngle = this.angle;
+    const p = this.pt(e);
+    if (this.mode === 'stick') {
+      this.prev = this.angle;
       this.angle = Math.atan2(p.sy - this.tray.cy, p.sx - this.tray.cx);
-      this.sand.spin(this.angle, this.prevAngle);
-      this.setArm(this.angle);
-      this.draw();
+      this.sand.spin(this.angle, this.prev);
+      this.syncArm();
+      this.paint();
       return;
     }
-
-    if (!this.lastG || !p.ok) return;
-    if (this.mode === 'sand') this.sand.pileLine(this.lastG.x, this.lastG.y, p.x, p.y);
-    this.lastG = p;
-    this.draw();
+    if (!this.last || !p.ok) return;
+    this.sand.pileLine(this.last.x, this.last.y, p.x, p.y);
+    this.last = p;
+    this.paint();
   },
 
-  onUp() {
-    this.drawing = false;
-    this.lastG = null;
-  },
+  up() { this.drawing = false; this.last = null; },
 
-  hitStick(p) {
-    if (this.mode === 'sand') return false;
-    const rx = p.sx - this.tray.cx;
-    const ry = p.sy - this.tray.cy;
-    const dist = Math.hypot(rx, ry);
-    if (dist < 12 || dist > this.tray.r * 0.98) return false;
-    const ang = Math.atan2(ry, rx);
-    let da = ang - this.angle;
-    while (da > Math.PI) da -= Math.PI * 2;
-    while (da < -Math.PI) da += Math.PI * 2;
-    return dist * Math.abs(Math.sin(da)) < 18;
-  },
-
-  tick() {
-    if (!this.running) return;
-
-    this.prevAngle = this.angle;
-    this.angle += 0.04;
-    this.spinTotal += 0.04;
-    this.sand.spin(this.angle, this.prevAngle);
-    this.setArm(this.angle);
-
-    if (this.spinTotal >= Math.PI * 2) {
-      this.spinTotal = 0;
-      this.sand._rings(this.sand.cx, this.sand.cy);
+  step() {
+    this.prev = this.angle;
+    this.angle += 0.045;
+    this.spinAcc += 0.045;
+    this.sand.spin(this.angle, this.prev);
+    this.syncArm();
+    if (this.spinAcc >= Math.PI * 2) {
+      this.spinAcc = 0;
+      this.sand.rings(this.sand.cx, this.sand.cy);
     }
-
-    if (Math.random() < 0.12) ZenAudio.brush(0.25);
-    this.draw();
+    if (Math.random() < 0.1) ZenAudio.brush(0.3);
+    this.paint();
   },
 
-  startSpin() {
+  start() {
     if (this.running) return;
     this.running = true;
     this.btnPlay.textContent = '⏸ Pause';
     this.btnPlay.classList.add('running');
-    document.getElementById('hint').textContent = 'Stab dreht… Hügel werden glatt gestrichen';
+    document.getElementById('hint').textContent = 'Stab dreht sich…';
     ZenAudio.ensure();
     ZenAudio.startMusic();
-
-    const loop = () => {
-      if (!this.running) {
-        this.animId = 0;
-        return;
-      }
-      this.tick();
-      this.animId = requestAnimationFrame(loop);
-    };
-    if (!this.animId) this.animId = requestAnimationFrame(loop);
+    this.step();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => this.step(), 40);
   },
 
-  stopSpin() {
+  stop() {
     this.running = false;
     this.btnPlay.textContent = '▶ Play';
     this.btnPlay.classList.remove('running');
-    document.getElementById('hint').textContent = 'Sand aufhäufen → Play → Stab dreht Kreise wie im Video';
-    if (this.animId) {
-      cancelAnimationFrame(this.animId);
-      this.animId = 0;
-    }
-    this.draw();
+    document.getElementById('hint').textContent = 'Sand aufhäufen → Play drücken';
+    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    this.paint();
   },
 
-  togglePlay(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (this.running) this.stopSpin();
-    else this.startSpin();
-    return false;
+  togglePlay() {
+    const now = Date.now();
+    if (now - this.playLock < 400) return;
+    this.playLock = now;
+    if (this.running) this.stop();
+    else this.start();
   },
 };
 
 window.SandApp = SandApp;
-document.addEventListener('DOMContentLoaded', () => {
-  SandApp.init();
-  if (window.ArcadeAnalytics) {
+window.zenTogglePlay = (e) => { SandApp.togglePlay(); return false; };
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => SandApp.boot());
+} else {
+  SandApp.boot();
+}
+
+if (window.ArcadeAnalytics) {
+  document.addEventListener('DOMContentLoaded', () => {
     ArcadeAnalytics.track('game_start', { game: 'zen-sand' });
-  }
-});
+  });
+}
