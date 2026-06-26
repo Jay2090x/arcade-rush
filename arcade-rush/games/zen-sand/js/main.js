@@ -16,6 +16,7 @@ const SandApp = {
   sandBuf: null,
   sandCtx: null,
   ready: false,
+  playLock: 0,
 
   boot() {
     this.canvas = document.getElementById('sand');
@@ -41,11 +42,11 @@ const SandApp = {
       document.getElementById('btn-sound').textContent = on ? '🔊' : '🔇';
     });
 
-    this.btnPlay.addEventListener('pointerup', (e) => {
+    this.btnPlay.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.togglePlay();
-    });
+    }, true);
 
     this.canvas.addEventListener('pointerdown', (e) => this.down(e));
     this.canvas.addEventListener('pointermove', (e) => this.move(e));
@@ -237,17 +238,15 @@ const SandApp = {
 
   togglePlay() {
     if (!this.ready) return;
+    const now = Date.now();
+    if (now - this.playLock < 500) return;
+    this.playLock = now;
     if (this.running) this.stop();
     else this.start();
   },
 };
 
 window.SandApp = SandApp;
-window.zenTogglePlay = function (e) {
-  if (e) { e.preventDefault(); e.stopPropagation(); }
-  SandApp.togglePlay();
-  return false;
-};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => SandApp.boot());
