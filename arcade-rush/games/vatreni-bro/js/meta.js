@@ -8,7 +8,7 @@ const Meta = {
   },
 
   BALLS: {
-    ball_default: { name: 'Classic', c1: '#141414', c2: '#FFFFFF' },
+    ball_default: { name: 'Checker', c1: '#C8102E', c2: '#FFFFFF' },
     ball_gold: { name: 'Gold Cup', c1: '#FFD54F', c2: '#FF8F00' },
     ball_neon: { name: 'Neon', c1: '#00E5FF', c2: '#7C4DFF' },
     ball_fire: { name: 'Fireball', c1: '#FF3D00', c2: '#FFEA00' },
