@@ -1,0 +1,31 @@
+# Repo-root config — Netlify liest das auch wenn die Base Directory in der UI leer ist.
+[build]
+  base = "arcade-rush"
+  publish = "arcade-rush"
+  command = "npm install && bash scripts/prepare-deploy.sh"
+
+[functions]
+  directory = "arcade-rush/netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/games/*/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/games/*/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
