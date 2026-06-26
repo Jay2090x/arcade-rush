@@ -22,12 +22,11 @@ jobs:
         run: npm install && bash scripts/prepare-deploy.sh
 
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify-deploy@v3.0
+        uses: netlify/actions/cli@v5.0.0
         with:
-          publish-dir: ./arcade-rush
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "GitHub Actions deploy ${{ github.sha }}"
+          args: deploy --prod --dir=.
+          secrets: '["NETLIFY_AUTH_TOKEN"]'
+        working-directory: arcade-rush
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: 09cd607d-5a09-4f72-b45f-56747e35937a
