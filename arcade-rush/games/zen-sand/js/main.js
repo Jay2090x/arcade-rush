@@ -247,6 +247,11 @@ const SandApp = {
 };
 
 window.SandApp = SandApp;
+window.zenTogglePlay = function (e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  SandApp.togglePlay();
+  return false;
+};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => SandApp.boot());
