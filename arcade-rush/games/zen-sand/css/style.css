@@ -18,7 +18,7 @@ html, body {
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 50;
 }
 
 .spinner-hub {
@@ -36,14 +36,27 @@ html, body {
 .spinner-arm {
   position: absolute;
   left: 50%; top: 50%;
-  width: 6px;
+  width: 8px;
   height: 47%;
-  margin-left: -3px;
+  margin-left: -4px;
   transform-origin: 50% 0%;
-  background: linear-gradient(180deg, #888078 0%, #f0ece4 40%, #fff 52%, #706860 100%);
-  border-radius: 3px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.45), 0 0 4px rgba(255,255,255,0.5);
+  background: linear-gradient(180deg, #3a3228 0%, #888078 25%, #fff 50%, #706860 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.6), 0 0 6px rgba(255,255,255,0.6);
   z-index: 3;
+}
+
+body.spinning .spinner-arm {
+  animation: arm-spin 2.5s linear infinite;
+}
+
+@keyframes arm-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+body.spinning .spinner-hub {
+  box-shadow: 0 0 16px rgba(255,220,150,0.9);
 }
 
 .hud {

@@ -15,7 +15,7 @@ const SandApp = {
   timer: null,
   sandBuf: null,
   sandCtx: null,
-  playLock: 0,
+  ready: false,
 
   boot() {
     this.canvas = document.getElementById('sand');
@@ -30,27 +30,34 @@ const SandApp = {
     this.sandCtx = this.sandBuf.getContext('2d', { alpha: false });
 
     document.querySelectorAll('.tool').forEach(b => {
-      b.addEventListener('click', () => this.setMode(b.dataset.mode));
+      b.addEventListener('pointerup', (e) => {
+        e.stopPropagation();
+        this.setMode(b.dataset.mode);
+      });
     });
-    document.getElementById('btn-sound').onclick = () => {
+
+    document.getElementById('btn-sound').addEventListener('pointerup', () => {
       const on = ZenAudio.toggle();
       document.getElementById('btn-sound').textContent = on ? '🔊' : '🔇';
-    };
+    });
 
-    const play = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } this.togglePlay(); };
-    this.btnPlay.addEventListener('click', play);
-    this.btnPlay.addEventListener('touchend', play, { passive: false });
+    this.btnPlay.addEventListener('pointerup', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.togglePlay();
+    });
 
-    this.canvas.onpointerdown = (e) => this.down(e);
-    this.canvas.onpointermove = (e) => this.move(e);
-    this.canvas.onpointerup = () => this.up();
-    this.canvas.onpointercancel = () => this.up();
-    window.onresize = () => this.layout();
+    this.canvas.addEventListener('pointerdown', (e) => this.down(e));
+    this.canvas.addEventListener('pointermove', (e) => this.move(e));
+    this.canvas.addEventListener('pointerup', () => this.up());
+    this.canvas.addEventListener('pointercancel', () => this.up());
+    window.addEventListener('resize', () => this.layout());
 
     ZenAudio.init();
     this.layout();
     this.paint();
     this.syncArm();
+    this.ready = true;
   },
 
   layout() {
@@ -66,7 +73,7 @@ const SandApp = {
     frame.style.width = sz + 'px';
     frame.style.height = sz + 'px';
     this.paint();
-    this.syncArm();
+    if (!this.running) this.syncArm();
   },
 
   setMode(m) {
@@ -85,6 +92,7 @@ const SandApp = {
   },
 
   syncArm() {
+    if (this.running) return;
     const deg = this.angle * 180 / Math.PI + 90;
     this.arm.style.transform = `rotate(${deg}deg)`;
   },
@@ -116,31 +124,26 @@ const SandApp = {
   drawStick(ctx, cx, cy, r, a) {
     const ex = cx + Math.cos(a) * r * 0.95;
     const ey = cy + Math.sin(a) * r * 0.95;
-
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 8;
     ctx.lineCap = 'round';
-
     ctx.beginPath();
-    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
-    ctx.fillStyle = '#5a5048';
+    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#4a4038';
     ctx.fill();
-    ctx.strokeStyle = '#ddd';
+    ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    const g = ctx.createLinearGradient(cx, cy, ex, ey);
-    g.addColorStop(0, '#6a6058');
-    g.addColorStop(0.4, '#c8c0b4');
-    g.addColorStop(0.55, '#fff');
-    g.addColorStop(1, '#7a7068');
-
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(ex, ey);
-    ctx.strokeStyle = g;
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#1a1510';
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = '#e8e0d4';
+    ctx.lineWidth = 3;
     ctx.stroke();
     ctx.restore();
   },
@@ -193,61 +196,61 @@ const SandApp = {
   up() { this.drawing = false; this.last = null; },
 
   step() {
+    if (!this.running) return;
     this.prev = this.angle;
-    this.angle += 0.045;
-    this.spinAcc += 0.045;
+    this.angle += 0.05;
+    this.spinAcc += 0.05;
     this.sand.spin(this.angle, this.prev);
-    this.syncArm();
     if (this.spinAcc >= Math.PI * 2) {
       this.spinAcc = 0;
       this.sand.rings(this.sand.cx, this.sand.cy);
     }
-    if (Math.random() < 0.1) ZenAudio.brush(0.3);
+    if (Math.random() < 0.08) ZenAudio.brush(0.25);
     this.paint();
   },
 
   start() {
     if (this.running) return;
     this.running = true;
+    document.body.classList.add('spinning');
     this.btnPlay.textContent = '⏸ Pause';
     this.btnPlay.classList.add('running');
-    document.getElementById('hint').textContent = 'Stab dreht sich…';
+    document.getElementById('hint').textContent = '● Stab dreht sich';
     ZenAudio.ensure();
     ZenAudio.startMusic();
     this.step();
-    if (this.timer) clearInterval(this.timer);
-    this.timer = setInterval(() => this.step(), 40);
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.step(), 50);
   },
 
   stop() {
     this.running = false;
+    document.body.classList.remove('spinning');
     this.btnPlay.textContent = '▶ Play';
     this.btnPlay.classList.remove('running');
     document.getElementById('hint').textContent = 'Sand aufhäufen → Play drücken';
-    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    clearInterval(this.timer);
+    this.timer = null;
+    this.syncArm();
     this.paint();
   },
 
   togglePlay() {
-    const now = Date.now();
-    if (now - this.playLock < 400) return;
-    this.playLock = now;
+    if (!this.ready) return;
     if (this.running) this.stop();
     else this.start();
   },
 };
 
 window.SandApp = SandApp;
-window.zenTogglePlay = (e) => { SandApp.togglePlay(); return false; };
+window.zenTogglePlay = function (e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  SandApp.togglePlay();
+  return false;
+};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => SandApp.boot());
 } else {
   SandApp.boot();
-}
-
-if (window.ArcadeAnalytics) {
-  document.addEventListener('DOMContentLoaded', () => {
-    ArcadeAnalytics.track('game_start', { game: 'zen-sand' });
-  });
 }
