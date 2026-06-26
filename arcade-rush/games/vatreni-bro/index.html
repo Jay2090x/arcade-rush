@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#C8102E">
+  <meta name="description" content="Vatreni Bro — tap-to-header arcade. Perfect timing, combos & fever. Fan game, not affiliated with any federation or player.">
+  <title>Vatreni Bro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <div class="hud" id="hud">
+      <div class="hud-top">
+        <div class="best-pill" style="margin-left:auto">
+          <span class="pill-icon">🏆</span>
+          <span class="pill-label" data-i18n="best">BEST</span>
+          <span id="best">0</span>
+        </div>
+      </div>
+      <div class="combo-panel" id="combo-panel">
+        <span class="combo-label" data-i18n="combo">COMBO</span>
+        <span id="combo">0</span>
+        <span class="mult-pill" id="mult-pill">x1</span>
+      </div>
+      <div class="score-panel">
+        <span class="score-label" data-i18n="points">POINTS</span>
+        <div class="score-wrap">
+          <span id="score">0</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="goal-hint" id="goal-hint">GOAL: 20</span>
+      </div>
+    </div>
+
+    <div class="overlay active" id="menu-screen">
+      <div class="logo-wrap">
+        <div class="logo-fire">🔥</div>
+        <h1>Vatreni Bro</h1>
+        <p class="tagline" data-i18n="tagline">Perfect timing · Combo fever 🇭🇷</p>
+      </div>
+
+      <div class="daily-card" id="daily-card">
+        <span class="daily-label" data-i18n="daily">Daily Challenge</span>
+        <p id="daily-text">—</p>
+        <div class="daily-bar"><div class="daily-fill" id="daily-fill"></div></div>
+      </div>
+
+      <button class="btn-play" id="btn-play">
+        <span class="btn-glow"></span>
+        <span data-i18n="tap_play">Tap to Play</span>
+      </button>
+
+      <div class="menu-stats">
+        <div class="stat"><span data-i18n="games">Games</span><strong id="menu-games">0</strong></div>
+        <div class="stat"><span data-i18n="best">Best</span><strong id="menu-best">0</strong></div>
+      </div>
+
+      <p class="hint" data-i18n="hint">Wait for Bro · Tap PERFECT! · Build combos</p>
+      <p class="legal-note">Fan tribute. Not affiliated with HNS, FIFA, or any real player.</p>
+      <a href="../../index.html" class="back-arcade" data-i18n="all_games">← All Games</a>
+    </div>
+
+    <div class="overlay" id="ready-screen">
+      <div class="ready-pulse"></div>
+      <p class="ready-text" data-i18n="ready">Ready?</p>
+      <p class="ready-sub" data-i18n="ready_sub">Hit PERFECT! for combos!</p>
+    </div>
+
+    <div class="overlay" id="gameover-screen">
+      <div class="go-card">
+        <h2 data-i18n="game_over">Game Over</h2>
+        <div class="go-score" id="go-score">0</div>
+        <div class="go-medal" id="go-medal"></div>
+        <p class="go-context" id="go-context"></p>
+        <div class="go-stats">
+          <div><span data-i18n="points">Points</span><strong id="go-final">0</strong></div>
+          <div><span data-i18n="best">Best</span><strong id="go-best">0</strong></div>
+          <div><span data-i18n="best_combo">Best Combo</span><strong id="go-streak">0</strong></div>
+        </div>
+        <div class="go-new-record" id="go-new-record" data-i18n="new_record">🎉 New Record!</div>
+        <div class="go-unlock" id="go-unlock"></div>
+        <button class="btn-play btn-retry" id="btn-retry" data-i18n="play_again">Play Again</button>
+        <button class="btn-share" id="btn-share" data-i18n="share">Share Score 🔗</button>
+        <a href="../../index.html" class="back-arcade go-home" data-i18n="all_games">← All Games</a>
+      </div>
+    </div>
+
+    <div class="tutorial-overlay" id="tutorial-overlay">
+      <div class="tutorial-card">
+        <span class="tutorial-step" id="tutorial-step">1 / 4</span>
+        <p class="tutorial-text" id="tutorial-text"></p>
+        <button class="tutorial-skip" id="tutorial-skip" data-i18n="skip_tutorial">Skip tutorial</button>
+      </div>
+    </div>
+
+    <button class="btn-lang" id="btn-lang" title="Language">DE</button>
+    <button class="btn-sound" id="btn-sound" title="Sound">🔊</button>
+  </div>
+
+  <script src="../../js/analytics.js" onerror="void 0"></script>
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/meta.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#C8102E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Checkered Keepy — Croatia-inspired keepy-uppy in your browser. Free, no download. Fan game — not affiliated with any player or federation.">
+  <title>Checkered Keepy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <div class="hud" id="hud">
+      <div class="hud-top">
+        <div class="best-pill">
+          <span class="pill-icon">🏆</span>
+          <span class="pill-label">BEST</span>
+          <span id="best">0</span>
+        </div>
+      </div>
+      <div class="score-panel">
+        <span class="score-label">HEADERS</span>
+        <div class="score-wrap">
+          <span id="score">0</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="goal-hint" id="goal-hint">GOAL: 20</span>
+      </div>
+    </div>
+
+    <div class="overlay active" id="menu-screen">
+      <div class="logo-wrap">
+        <div class="logo-checker" aria-hidden="true"></div>
+        <h1>Checkered Keepy</h1>
+        <p class="tagline">Croatia checkerboard keepy-uppy 🇭🇷</p>
+      </div>
+      <button class="btn-play" id="btn-play">
+        <span class="btn-glow"></span>
+        Tap to Play
+      </button>
+      <div class="menu-stats">
+        <div class="stat"><span>Best</span><strong id="menu-best">0</strong></div>
+        <div class="stat"><span>Games</span><strong id="menu-games">0</strong></div>
+      </div>
+      <p class="hint">Slide finger left/right to move · Keep the checker ball alive</p>
+      <p class="legal-note">Fan game with a stylized #10 hero. Not affiliated with any player, club, or federation.</p>
+      <a href="../../index.html" class="back-arcade">← All Games</a>
+    </div>
+
+    <div class="overlay" id="ready-screen">
+      <div class="ready-pulse"></div>
+      <p class="ready-text">Ready?</p>
+      <p class="ready-sub">Tap — header the ball!</p>
+    </div>
+
+    <div class="overlay" id="gameover-screen">
+      <div class="go-card">
+        <h2>Game Over</h2>
+        <div class="go-score" id="go-score">0</div>
+        <div class="go-medal" id="go-medal"></div>
+        <div class="go-stats">
+          <div><span>Headers</span><strong id="go-final">0</strong></div>
+          <div><span>Best</span><strong id="go-best">0</strong></div>
+          <div><span>Streak</span><strong id="go-streak">0</strong></div>
+        </div>
+        <div class="go-new-record" id="go-new-record">🎉 New Record!</div>
+        <button class="btn-play btn-retry" id="btn-retry">Play Again</button>
+        <a href="../../index.html" class="back-arcade go-home">← All Games</a>
+      </div>
+    </div>
+
+    <button class="btn-sound" id="btn-sound" title="Sound">🔊</button>
+  </div>
+
+  <script src="../../js/analytics.js" onerror="void 0"></script>
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

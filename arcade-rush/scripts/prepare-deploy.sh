@@ -26,6 +26,7 @@ mkdir -p "$GAMES"
 copy_game "sky-drift" "$PARENT/sky-drift"
 copy_game "goldgraeber" "$PARENT/goldgraeber-saga"
 copy_game "neon-stack" "$PARENT/neon-stack"
+copy_game "vatreni-bro" "$PARENT/vatreni-bro"
 
 # SEO: {{SITE_URL}} in HTML ersetzen (Netlify setzt URL beim Build)
 for html in "$ROOT/index.html" "$ROOT/datenschutz.html"; do
@@ -52,6 +53,7 @@ cat > "$ROOT/sitemap.xml" << EOF
   <url><loc>$SITE_URL/games/sky-drift/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/games/goldgraeber/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/games/neon-stack/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
+  <url><loc>$SITE_URL/games/vatreni-bro/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/datenschutz.html</loc><lastmod>$TODAY</lastmod><priority>0.3</priority></url>
 </urlset>
 EOF

@@ -311,11 +311,17 @@ body {
   flex-shrink: 0;
 }
 
+.card-visual.kick { background: linear-gradient(135deg, #C8102E, #ffffff 45%, #C8102E); }
 .card-visual.sky { background: linear-gradient(135deg, #3949ab, #64b5f6); }
 .card-visual.gold { background: linear-gradient(135deg, #b8860b, #ffd700); }
 .card-visual.stack { background: linear-gradient(135deg, #e040fb, #7c4dff, #00e5ff); }
 
 .card-emoji { font-size: 2rem; }
+
+.card-tag-new {
+  background: rgba(200, 16, 46, 0.2);
+  color: #ff8a80;
+}
 
 .card-info { flex: 1; min-width: 0; }
 .card-info h2 { font-size: 1.05rem; font-weight: 700; }
