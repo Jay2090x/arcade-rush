@@ -3,69 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#141210">
-  <meta name="description" content="Zen Rings — Kinetischer Sand wie im Video. Stab drehen, Kreise entstehen, Hügel glatt streichen.">
-  <title>Zen Rings — Sand Kreise</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#111010">
+  <title>Zen Rings</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div id="app">
-    <canvas id="sand-canvas"></canvas>
+  <canvas id="sand" aria-hidden="true"></canvas>
+
+  <div class="tray-frame" id="tray-frame">
+    <div class="spinner-hub" id="spinner-hub" aria-hidden="true"></div>
+    <div class="spinner-arm" id="spinner-arm" aria-hidden="true"></div>
   </div>
 
-  <div id="ui-root">
-    <header class="top-bar">
-      <div class="brand">
-        <h1 data-i18n="title">Zen Rings</h1>
-        <p data-i18n="tagline">Wie im Sand-Video — Stab dreht Kreise</p>
-      </div>
-      <div class="top-actions">
-        <button type="button" class="btn-icon" id="btn-sound" aria-label="Sound">🔊</button>
-        <a class="btn-back" href="../../" data-i18n="back">Zurück</a>
-      </div>
-    </header>
-
-    <div class="play-wrap">
-      <button type="button" class="btn-play" id="btn-play" aria-pressed="false"
-        onclick="return window.zenTogglePlay && window.zenTogglePlay(event)">
-        <span class="play-icon" aria-hidden="true">▶</span>
-        <span class="play-label" data-i18n="play_start">Play</span>
-      </button>
-    </div>
-
-    <nav class="toolbar" aria-label="Werkzeuge">
-      <button type="button" class="tool-btn active" data-tool="pile" data-i18n-title="tool_pile">
-        <span class="icon">⛰️</span>
-        <span data-i18n="tool_pile">Sand</span>
-      </button>
-      <button type="button" class="tool-btn" data-tool="spin" data-i18n-title="tool_spin">
-        <span class="icon">🪄</span>
-        <span data-i18n="tool_spin">Stab</span>
-      </button>
-      <button type="button" class="tool-btn" data-tool="reset" data-i18n-title="tool_reset">
-        <span class="icon">↺</span>
-        <span data-i18n="tool_reset">Neu</span>
-      </button>
-    </nav>
-
-    <div class="intro-overlay" id="intro">
-      <div class="intro-card">
-        <h2 data-i18n="title">Zen Rings</h2>
-        <p data-i18n="hint">Häufe Sand auf, tippe Play — der Stab dreht sich und streicht perfekte Kreise wie im Video.</p>
-        <button type="button" class="btn-primary" id="btn-dismiss" data-i18n="dismiss">Loslegen</button>
-      </div>
-    </div>
+  <div class="hud">
+    <a class="btn-back" href="../../">← Zurück</a>
+    <button type="button" class="btn-sound" id="btn-sound">🔊</button>
   </div>
+
+  <div class="controls">
+    <button type="button" class="tool active" data-mode="sand" id="tool-sand">⛰️ Sand</button>
+    <button type="button" class="tool" data-mode="stick" id="tool-stick">🪄 Stab</button>
+    <button type="button" class="btn-play" id="btn-play" onclick="SandApp.togglePlay(event)">▶ Play</button>
+    <button type="button" class="tool" data-mode="reset" id="tool-reset">↺ Neu</button>
+  </div>
+
+  <p class="hint" id="hint">Sand aufhäufen → Play → Stab dreht Kreise wie im Video</p>
 
   <script src="../../js/analytics.js" onerror="void 0"></script>
-  <script src="js/config.js"></script>
-  <script src="js/sand-engine.js"></script>
-  <script src="js/renderer.js"></script>
   <script src="js/audio.js"></script>
-  <script src="js/i18n.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/sand.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
