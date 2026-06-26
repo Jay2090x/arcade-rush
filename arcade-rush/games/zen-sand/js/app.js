@@ -8,20 +8,21 @@
   const btnPlay = document.getElementById('btn-play');
   const toolBtns = [...document.querySelectorAll('[data-tool]')];
 
-  let tool = 'rake';
+  let tool = 'pile';
   let drawing = false;
   let last = null;
   let dirty = true;
-  let idleLoop = 0;
-  let playLoop = 0;
-  let playing = false;
+  let animId = 0;
+  let autoSpin = false;
   let armAngle = -Math.PI / 2;
-  let prevArmAngle = -Math.PI / 2;
-  let lastPlayFrame = 0;
-  let playTapLock = 0;
+  let prevArmAngle = armAngle;
+  let lastFrame = 0;
+  let spinAccum = 0;
+  let dragStick = false;
 
   ZenAudio.init();
   ZenI18n.apply();
+  setTool('pile');
 
   function dismissIntro() {
     intro.classList.add('hidden');
@@ -29,72 +30,63 @@
   }
 
   function setTool(next) {
-    if (playing) return;
+    if (autoSpin) return;
     tool = next;
     toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
   }
 
-  function renderFrame() {
-    renderer.render(engine);
-    if (last && drawing && !playing) {
-      renderer.drawCursor(last.sx, last.sy, tool, true);
-    }
-  }
-
-  function idleTick() {
-    idleLoop = 0;
-    if (playing) return;
-    if (!dirty) return;
-    dirty = false;
-    renderFrame();
-  }
-
-  function markDirty() {
-    if (playing) return;
-    dirty = true;
-    if (!idleLoop) idleLoop = requestAnimationFrame(idleTick);
-  }
-
-  function playTick(now) {
-    if (!playing) {
-      playLoop = 0;
-      return;
-    }
-    playLoop = requestAnimationFrame(playTick);
-
-    const t = now || performance.now();
-    const dt = lastPlayFrame ? Math.min(50, t - lastPlayFrame) : 16;
-    lastPlayFrame = t;
-
-    prevArmAngle = armAngle;
-    armAngle += ZenConfig.PLAY.speed * (dt / 16);
-
-    const c = engine.center();
-    engine.sweepArm(c.x, c.y, armAngle, prevArmAngle);
-    if (Math.random() < 0.18) ZenAudio.brush(0.35);
-
+  function render() {
     renderer.setArm(armAngle, true);
-    renderFrame();
+    renderer.render(engine);
+    if (last && drawing && !autoSpin) renderer.drawCursor(last.sx, last.sy, tool, true);
+    dirty = false;
   }
 
-  function startPlayLoop() {
-    if (playLoop) return;
-    lastPlayFrame = 0;
+  function requestRender() {
+    dirty = true;
+  }
+
+  function spinnerStep() {
+    const c = engine.center();
+    engine.spinnerStep(c.x, c.y, armAngle, prevArmAngle);
     prevArmAngle = armAngle;
-    playLoop = requestAnimationFrame(playTick);
+    if (Math.random() < 0.14) ZenAudio.brush(0.3);
   }
 
-  function stopPlayLoop() {
-    if (playLoop) cancelAnimationFrame(playLoop);
-    playLoop = 0;
+  function tick(now) {
+    animId = requestAnimationFrame(tick);
+    const t = now || performance.now();
+
+    if (autoSpin) {
+      const dt = lastFrame ? Math.min(48, t - lastFrame) : 16;
+      const step = ZenConfig.SPINNER.autoSpeed * (dt / 16);
+      prevArmAngle = armAngle;
+      armAngle += step;
+      spinAccum += Math.abs(step);
+      spinnerStep();
+
+      if (spinAccum >= Math.PI * 2) {
+        spinAccum = 0;
+        const c = engine.center();
+        engine.drawConcentricRings(c.x, c.y);
+      }
+      render();
+    } else if (dirty) {
+      render();
+    }
+
+    lastFrame = t;
   }
 
-  function setPlaying(on) {
-    playing = on;
+  function ensureAnim() {
+    if (!animId) animId = requestAnimationFrame(tick);
+  }
+
+  function setAutoSpin(on) {
+    autoSpin = on;
     btnPlay.classList.toggle('playing', on);
     btnPlay.setAttribute('aria-pressed', on ? 'true' : 'false');
     btnPlay.querySelector('.play-label').textContent = ZenI18n.t(on ? 'play_pause' : 'play_start');
-    renderer.setArm(armAngle, on);
     canvas.classList.toggle('is-playing', on);
 
     try {
@@ -104,96 +96,137 @@
     } catch (_) {}
 
     if (on) {
-      startPlayLoop();
+      lastFrame = 0;
+      spinAccum = 0;
+      prevArmAngle = armAngle;
+      ensureAnim();
     } else {
-      stopPlayLoop();
-      markDirty();
+      requestRender();
+      ensureAnim();
     }
   }
 
-  function togglePlay() {
-    const now = Date.now();
-    if (now - playTapLock < 350) return;
-    playTapLock = now;
+  function togglePlay(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     dismissIntro();
-    setPlaying(!playing);
+    setAutoSpin(!autoSpin);
+    return false;
   }
 
   window.zenTogglePlay = togglePlay;
 
   function pointerPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const sx = (e.clientX ?? e.pageX) - rect.left;
-    const sy = (e.clientY ?? e.pageY) - rect.top;
-    const g = engine.screenToGrid(sx, sy, rect.width, rect.height, renderer.tray);
-    return { sx, sy, ...g };
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    return { sx, sy, ...engine.screenToGrid(sx, sy, rect.width, rect.height, renderer.tray) };
+  }
+
+  function angleFromPointer(p) {
+    const tray = renderer.tray;
+    return Math.atan2(p.sy - tray.cy, p.sx - tray.cx);
+  }
+
+  function onStickLine(p, threshold = 16) {
+    const tray = renderer.tray;
+    const rx = p.sx - tray.cx;
+    const ry = p.sy - tray.cy;
+    const dist = Math.hypot(rx, ry);
+    if (dist < 10 || dist > tray.radius * 0.98) return false;
+    const ang = Math.atan2(ry, rx);
+    let da = ang - armAngle;
+    while (da > Math.PI) da -= Math.PI * 2;
+    while (da < -Math.PI) da += Math.PI * 2;
+    const perp = dist * Math.abs(Math.sin(da));
+    return perp < threshold;
   }
 
   function onDown(e) {
-    if (playing) return;
+    if (autoSpin) return;
     e.preventDefault();
     ZenAudio.ensure();
     const p = pointerPos(e);
-    if (!p.inside && tool !== 'rings') return;
+
+    if (tool === 'spin' || onStickLine(p)) {
+      dragStick = true;
+      prevArmAngle = armAngle;
+      armAngle = angleFromPointer(p);
+      spinnerStep();
+      requestRender();
+      ensureAnim();
+      return;
+    }
+
+    if (!p.inside) return;
     drawing = true;
     last = p;
 
-    if (tool === 'rings' && p.inside) {
-      engine.ringsAt(p.x, p.y);
-      ZenAudio.brush(0.7);
-      markDirty();
-      drawing = false;
-      return;
-    }
     if (tool === 'reset') {
       engine.reset();
-      ZenAudio.brush(0.5);
-      markDirty();
+      armAngle = -Math.PI / 2;
+      prevArmAngle = armAngle;
+      requestRender();
+      ensureAnim();
       drawing = false;
       return;
     }
-    if (tool === 'pile' && p.inside) engine.pileAt(p.x, p.y);
-    markDirty();
+    if (tool === 'pile') engine.pileAt(p.x, p.y);
+    requestRender();
+    ensureAnim();
   }
 
   function onMove(e) {
-    if (playing || !drawing || tool === 'rings' || tool === 'reset') return;
     e.preventDefault();
     const p = pointerPos(e);
+
+    if (dragStick) {
+      prevArmAngle = armAngle;
+      armAngle = angleFromPointer(p);
+      spinnerStep();
+      requestRender();
+      ensureAnim();
+      return;
+    }
+
+    if (autoSpin || !drawing) return;
+
     if (!last) {
       last = p;
       return;
     }
 
-    if (tool === 'rake' && p.inside && last.inside) {
-      engine.rakeSegment(last.x, last.y, p.x, p.y, ZenConfig.RAKE.strength, ZenConfig.RAKE.tineSpacing, ZenConfig.RAKE.tineCount);
-      const speed = Math.hypot(p.x - last.x, p.y - last.y);
-      if (speed > 0.4) ZenAudio.brush(Math.min(1, speed * 0.08));
-    } else if (tool === 'pile' && p.inside) {
+    if (tool === 'pile' && p.inside) {
       engine.pileStroke(last.x, last.y, p.x, p.y);
-    } else if (tool === 'smooth' && p.inside) {
-      engine.smooth(1, 0.22);
+    } else if (tool === 'rake' && p.inside && last.inside) {
+      engine.rakeSegment(last.x, last.y, p.x, p.y, ZenConfig.RAKE.strength, ZenConfig.RAKE.tineSpacing, ZenConfig.RAKE.tineCount);
+      if (Math.hypot(p.x - last.x, p.y - last.y) > 0.5) ZenAudio.brush(0.2);
     }
 
     last = p;
-    markDirty();
+    requestRender();
+    ensureAnim();
   }
 
   function onUp() {
-    if (playing) return;
-    if (tool === 'smooth' && drawing) engine.smooth(2, ZenConfig.SMOOTH.mix);
+    dragStick = false;
+    if (autoSpin) return;
     drawing = false;
     last = null;
-    markDirty();
+    requestRender();
   }
 
   function resize() {
     renderer.resize(window.innerWidth, window.innerHeight);
-    markDirty();
+    requestRender();
+    ensureAnim();
   }
 
   toolBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       setTool(btn.dataset.tool);
     });
@@ -202,17 +235,10 @@
   btnDismiss.addEventListener('click', dismissIntro);
   if (sessionStorage.getItem('zen_sand_intro') === '1') intro.classList.add('hidden');
 
-  btnPlay.addEventListener('pointerup', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    togglePlay();
-  }, { passive: false });
-
   btnSound.addEventListener('click', (e) => {
     e.stopPropagation();
     const on = ZenAudio.toggle();
     btnSound.textContent = on ? '🔊' : '🔇';
-    btnSound.setAttribute('aria-label', ZenI18n.t(on ? 'sound_on' : 'sound_off'));
   });
   btnSound.textContent = ZenAudio.enabled ? '🔊' : '🔇';
 
@@ -220,13 +246,18 @@
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', onUp);
   canvas.addEventListener('pointercancel', onUp);
-  canvas.addEventListener('pointerleave', onUp);
 
   window.addEventListener('resize', resize);
   resize();
-  markDirty();
+  ensureAnim();
 
   if (window.ArcadeAnalytics) {
     ArcadeAnalytics.track('game_start', { game: 'zen-sand' });
   }
+
+  window.__zenState = () => ({
+    autoSpin,
+    armAngle,
+    maxH: Math.max(...engine.heights),
+  });
 })();

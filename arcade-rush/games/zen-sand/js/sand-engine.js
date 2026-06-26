@@ -1,4 +1,4 @@
-/** Height-field sand simulation for zen raking */
+/** Height-field sand — concentric circle spinner like kinetic sand tray */
 class SandEngine {
   constructor(size = ZenConfig.GRID) {
     this.size = size;
@@ -16,55 +16,60 @@ class SandEngine {
   }
 
   inCircle(nx, ny) {
-    const d = nx * nx + ny * ny;
-    return d <= 0.96;
+    return nx * nx + ny * ny <= 0.97;
   }
 
   _seedNoise() {
     for (let i = 0; i < this.noise.length; i++) {
-      this.noise[i] = (Math.random() - 0.5) * 0.04;
+      this.noise[i] = (Math.random() - 0.5) * 0.03;
     }
+  }
+
+  center() {
+    const m = (this.size - 1) * 0.5;
+    return { x: m, y: m };
   }
 
   reset() {
     this.heights.fill(0);
     const c = this.center();
-    this.drawConcentricRings(c.x, c.y, ZenConfig.RINGS.spacing, ZenConfig.RINGS.strength, ZenConfig.RINGS.maxRadius);
+    this.drawConcentricRings(c.x, c.y);
   }
 
-  drawConcentricRings(cx, cy, spacing, strength, maxR) {
+  drawConcentricRings(cx, cy) {
+    const cfg = ZenConfig.RINGS;
     const s = this.size;
     const mid = (s - 1) * 0.5;
-    const maxRadius = maxR * s * 0.5;
-    for (let r = spacing; r < maxRadius; r += spacing) {
-      const steps = Math.max(48, Math.ceil(r * 0.55));
+    const maxRadius = cfg.maxRadius * s * 0.5;
+    for (let r = cfg.spacing; r < maxRadius; r += cfg.spacing) {
+      const steps = Math.max(64, Math.ceil(r * 0.7));
       let px = null;
       let py = null;
       for (let i = 0; i <= steps; i++) {
         const a = (i / steps) * Math.PI * 2;
         const x = cx + Math.cos(a) * r;
         const y = cy + Math.sin(a) * r;
-        if (px != null) this.rakeSegment(px, py, x, y, strength * 0.85, 0.45, 3);
+        if (px != null) {
+          this.rakeSegment(px, py, x, y, cfg.strength, 0.4, 3);
+        }
         px = x;
         py = y;
       }
     }
-    this._verticalDivider(mid, strength * 0.7);
+    this._verticalDivider(mid, cfg.strength * 0.65);
   }
 
   _verticalDivider(x, strength) {
     const s = this.size;
-    const y0 = s * 0.08;
-    const y1 = s * 0.92;
-    this.rakeSegment(x, y0, x, y1, strength, 0.35, 1);
+    this.rakeSegment(x, s * 0.06, x, s * 0.94, strength, 0.3, 1);
   }
 
   rakeSegment(x0, y0, x1, y1, strength, tineSpacing, tineCount) {
     const dx = x1 - x0;
     const dy = y1 - y0;
     const len = Math.hypot(dx, dy);
-    if (len < 0.2) return;
-    const steps = Math.max(2, Math.ceil(len * 1.8));
+    if (len < 0.15) return;
+    const steps = Math.max(2, Math.ceil(len * 2));
     const ux = dx / len;
     const uy = dy / len;
     const nx = -uy;
@@ -96,30 +101,25 @@ class SandEngine {
         const nx = (x - (s - 1) * 0.5) / (s * 0.5);
         const ny = (y - (s - 1) * 0.5) / (s * 0.5);
         if (!this.inCircle(nx, ny)) continue;
-
         const dx = x - cx;
         const dy = y - cy;
         const d2 = dx * dx + dy * dy;
         if (d2 > r2) continue;
-
         const along = dx * gx + dy * gy;
-        const wave = Math.sin(along * 1.35) * 0.22;
+        const wave = Math.sin(along * 1.5) * 0.2;
         const falloff = 1 - Math.sqrt(d2) / r;
-        const i = this.idx(x, y);
-        this.heights[i] -= strength * falloff * (0.75 + wave);
+        this.heights[this.idx(x, y)] -= strength * falloff * (0.8 + wave);
       }
     }
   }
 
   pileStroke(x0, y0, x1, y1) {
     const cfg = ZenConfig.PILE;
-    const dx = x1 - x0;
-    const dy = y1 - y0;
-    const len = Math.hypot(dx, dy);
-    const steps = Math.max(1, Math.ceil(len / 3));
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    const steps = Math.max(1, Math.ceil(len / 2.5));
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
-      this.pileAt(x0 + dx * t, y0 + dy * t, cfg.dragStrength, cfg.dragRadius);
+      this.pileAt(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, cfg.dragStrength, cfg.dragRadius);
     }
   }
 
@@ -142,17 +142,16 @@ class SandEngine {
         const dy = y - cy;
         const d2 = dx * dx + dy * dy;
         if (d2 > r2) continue;
-        const dist = Math.sqrt(d2);
-        const falloff = 1 - dist / radius;
-        const peak = Math.pow(Math.max(0, falloff), 1.35);
+        const falloff = 1 - Math.sqrt(d2) / radius;
+        const peak = Math.pow(Math.max(0, falloff), 1.2);
         const i = this.idx(x, y);
         this.heights[i] += strength * peak;
-        this.heights[i] = Math.min(this.heights[i], 12);
+        this.heights[i] = Math.min(this.heights[i], 18);
       }
     }
   }
 
-  smooth(passes = ZenConfig.SMOOTH.passes, mix = ZenConfig.SMOOTH.mix) {
+  smooth(passes = 1, mix = 0.38) {
     const s = this.size;
     const tmp = new Float32Array(this.heights.length);
     for (let p = 0; p < passes; p++) {
@@ -175,50 +174,60 @@ class SandEngine {
   }
 
   ringsAt(cx, cy) {
-    this.drawConcentricRings(cx, cy, ZenConfig.RINGS.spacing, ZenConfig.RINGS.strength, ZenConfig.RINGS.maxRadius * 0.65);
+    this.drawConcentricRings(cx, cy);
   }
 
-  center() {
-    const m = (this.size - 1) * 0.5;
-    return { x: m, y: m };
+  _normAngle(a) {
+    let x = a;
+    while (x <= -Math.PI) x += Math.PI * 2;
+    while (x > Math.PI) x -= Math.PI * 2;
+    return x;
   }
 
-  /** Rotating arm: rake outward and flatten piled sand in a wide blade */
-  sweepArm(cx, cy, angle, prevAngle) {
-    const cfg = ZenConfig.PLAY;
+  _angleDiff(a1, a0) {
+    return this._normAngle(a1 - a0);
+  }
+
+  /**
+   * Video mechanic: radial stick rotates, rake teeth cut TANGENT grooves
+   * (concentric circles) and flatten piled sand in the swept wedge.
+   */
+  spinnerStep(cx, cy, angle, prevAngle) {
+    const cfg = ZenConfig.SPINNER;
     const outerR = this.size * cfg.outerFrac;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    const x0 = cx + cos * cfg.innerR;
-    const y0 = cy + sin * cfg.innerR;
-    const x1 = cx + cos * outerR;
-    const y1 = cy + sin * outerR;
+    const tx = -sin;
+    const ty = cos;
 
-    this.rakeSegment(x0, y0, x1, y1, cfg.rakeStrength, 0.48, cfg.tineCount);
-    this._levelCorridor(cx, cy, angle, cfg.innerR, outerR, cfg.corridor, cfg.levelMix);
     if (prevAngle != null) {
-      this._flattenWedge(cx, cy, prevAngle, angle, cfg.innerR, outerR, cfg.levelMix);
+      this._flattenWedge(cx, cy, prevAngle, angle, outerR, cfg.flattenMix);
     }
+
+    const samples = cfg.samples;
+    for (let i = 0; i <= samples; i++) {
+      const r = cfg.innerR + (outerR - cfg.innerR) * (i / samples);
+      const px = cx + cos * r;
+      const py = cy + sin * r;
+      const len = cfg.tangentLen * (0.7 + 0.3 * (r / outerR));
+      this.rakeSegment(
+        px - tx * len, py - ty * len,
+        px + tx * len, py + ty * len,
+        cfg.tangentStrength, cfg.tineSpacing, cfg.tineCount
+      );
+    }
+
+    this._bladeAlongArm(cx, cy, angle, cfg.innerR, outerR, cfg.bladeWidth, cfg.flattenMix);
   }
 
-  _angleDiff(a, b) {
-    let d = a - b;
-    while (d > Math.PI) d -= Math.PI * 2;
-    while (d < -Math.PI) d += Math.PI * 2;
-    return d;
-  }
-
-  _flattenWedge(cx, cy, a0, a1, innerR, outerR, mix) {
+  _flattenWedge(cx, cy, a0, a1, outerR, mix) {
     const s = this.size;
-    const half = Math.max(Math.abs(this._angleDiff(a1, a0)) * 1.2, ZenConfig.PLAY.wedge);
+    const da = this._angleDiff(a1, a0);
+    const half = Math.max(Math.abs(da) * 1.35, 0.12);
     const mid = a1;
-    const minX = Math.max(0, Math.floor(cx - outerR - 2));
-    const maxX = Math.min(s - 1, Math.ceil(cx + outerR + 2));
-    const minY = Math.max(0, Math.floor(cy - outerR - 2));
-    const maxY = Math.min(s - 1, Math.ceil(cy + outerR + 2));
 
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
+    for (let y = 0; y < s; y++) {
+      for (let x = 0; x < s; x++) {
         const nx = (x - (s - 1) * 0.5) / (s * 0.5);
         const ny = (y - (s - 1) * 0.5) / (s * 0.5);
         if (!this.inCircle(nx, ny)) continue;
@@ -226,35 +235,31 @@ class SandEngine {
         const rx = x - cx;
         const ry = y - cy;
         const dist = Math.hypot(rx, ry);
-        if (dist < innerR || dist > outerR) continue;
+        if (dist < 2 || dist > outerR) continue;
 
         const cellA = Math.atan2(ry, rx);
         const diff = Math.abs(this._angleDiff(cellA, mid));
         if (diff > half) continue;
 
-        const falloff = (1 - diff / half) * (1 - Math.abs(dist - outerR * 0.5) / (outerR * 0.5));
+        const falloff = (1 - diff / half) * (1 - dist / outerR * 0.15);
         const i = this.idx(x, y);
         const h = this.heights[i];
         if (h > 0) {
-          this.heights[i] = h * (1 - mix * Math.max(0.35, falloff));
-        } else {
-          this.heights[i] = h * (1 - mix * 0.25 * falloff);
+          this.heights[i] = h * (1 - mix * falloff);
+        } else if (h < -0.05) {
+          this.heights[i] = h * (1 - mix * 0.15 * falloff);
         }
       }
     }
   }
 
-  _levelCorridor(cx, cy, angle, innerR, outerR, width, mix) {
+  _bladeAlongArm(cx, cy, angle, innerR, outerR, width, mix) {
     const s = this.size;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    const minX = Math.max(0, Math.floor(cx - outerR - width));
-    const maxX = Math.min(s - 1, Math.ceil(cx + outerR + width));
-    const minY = Math.max(0, Math.floor(cy - outerR - width));
-    const maxY = Math.min(s - 1, Math.ceil(cy + outerR + width));
 
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
+    for (let y = 0; y < s; y++) {
+      for (let x = 0; x < s; x++) {
         const nx = (x - (s - 1) * 0.5) / (s * 0.5);
         const ny = (y - (s - 1) * 0.5) / (s * 0.5);
         if (!this.inCircle(nx, ny)) continue;
@@ -269,11 +274,7 @@ class SandEngine {
         const falloff = 1 - perp / width;
         const i = this.idx(x, y);
         const h = this.heights[i];
-        if (h > 0) {
-          this.heights[i] = h * (1 - mix * falloff);
-        } else {
-          this.heights[i] = h * (1 - mix * 0.35 * falloff);
-        }
+        if (h > 0) this.heights[i] = h * (1 - mix * falloff);
       }
     }
   }
@@ -282,7 +283,9 @@ class SandEngine {
     const s = this.size;
     const x = ((sx - tray.cx) / tray.radius) * (s * 0.5) + (s - 1) * 0.5;
     const y = ((sy - tray.cy) / tray.radius) * (s * 0.5) + (s - 1) * 0.5;
-    return { x, y, inside: this.inCircle((x - (s - 1) * 0.5) / (s * 0.5), (y - (s - 1) * 0.5) / (s * 0.5)) };
+    const nx = (x - (s - 1) * 0.5) / (s * 0.5);
+    const ny = (y - (s - 1) * 0.5) / (s * 0.5);
+    return { x, y, inside: this.inCircle(nx, ny), nx, ny };
   }
 }
 

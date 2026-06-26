@@ -30,6 +30,8 @@ html = (ROOT / "index.html").read_text()
 ok("sand-canvas" in html, "canvas element")
 ok("btn-play" in html, "play button")
 ok("sand-engine.js" in html, "engine script")
+ok("zenTogglePlay" in (ROOT / "js/app.js").read_text(), "global play toggle")
+ok("spinnerStep" in (ROOT / "js/sand-engine.js").read_text(), "spinner mechanic")
 ok("analytics.js" in html, "analytics script")
 
 for js in ["js/sand-engine.js", "js/renderer.js", "js/app.js"]:

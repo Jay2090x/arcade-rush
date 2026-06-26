@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#1c1a18">
-  <meta name="description" content="Zen Rings — beruhigendes Sandkunst-Spiel. Ziehe Kreise und Muster in feinen Sand. Pure Entspannung im Browser.">
-  <title>Zen Rings — Sand Entspannung</title>
+  <meta name="theme-color" content="#141210">
+  <meta name="description" content="Zen Rings — Kinetischer Sand wie im Video. Stab drehen, Kreise entstehen, Hügel glatt streichen.">
+  <title>Zen Rings — Sand Kreise</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
     <header class="top-bar">
       <div class="brand">
         <h1 data-i18n="title">Zen Rings</h1>
-        <p data-i18n="tagline">Kreise in den Sand ziehen</p>
+        <p data-i18n="tagline">Wie im Sand-Video — Stab dreht Kreise</p>
       </div>
       <div class="top-actions">
         <button type="button" class="btn-icon" id="btn-sound" aria-label="Sound">🔊</button>
@@ -29,28 +29,21 @@
     </header>
 
     <div class="play-wrap">
-      <button type="button" class="btn-play" id="btn-play" aria-pressed="false">
+      <button type="button" class="btn-play" id="btn-play" aria-pressed="false"
+        onclick="return window.zenTogglePlay && window.zenTogglePlay(event)">
         <span class="play-icon" aria-hidden="true">▶</span>
         <span class="play-label" data-i18n="play_start">Play</span>
       </button>
     </div>
 
     <nav class="toolbar" aria-label="Werkzeuge">
-      <button type="button" class="tool-btn active" data-tool="rake" data-i18n-title="tool_rake">
-        <span class="icon">〰️</span>
-        <span data-i18n="tool_rake">Harke</span>
-      </button>
-      <button type="button" class="tool-btn" data-tool="pile" data-i18n-title="tool_pile">
+      <button type="button" class="tool-btn active" data-tool="pile" data-i18n-title="tool_pile">
         <span class="icon">⛰️</span>
-        <span data-i18n="tool_pile">Hügel</span>
+        <span data-i18n="tool_pile">Sand</span>
       </button>
-      <button type="button" class="tool-btn" data-tool="smooth" data-i18n-title="tool_smooth">
-        <span class="icon">🌊</span>
-        <span data-i18n="tool_smooth">Glätten</span>
-      </button>
-      <button type="button" class="tool-btn" data-tool="rings" data-i18n-title="tool_rings">
-        <span class="icon">◎</span>
-        <span data-i18n="tool_rings">Kreise</span>
+      <button type="button" class="tool-btn" data-tool="spin" data-i18n-title="tool_spin">
+        <span class="icon">🪄</span>
+        <span data-i18n="tool_spin">Stab</span>
       </button>
       <button type="button" class="tool-btn" data-tool="reset" data-i18n-title="tool_reset">
         <span class="icon">↺</span>
@@ -61,7 +54,7 @@
     <div class="intro-overlay" id="intro">
       <div class="intro-card">
         <h2 data-i18n="title">Zen Rings</h2>
-        <p data-i18n="hint">Häufe Sand auf — dann Play: der Stab dreht sich und streicht alles glatt.</p>
+        <p data-i18n="hint">Häufe Sand auf, tippe Play — der Stab dreht sich und streicht perfekte Kreise wie im Video.</p>
         <button type="button" class="btn-primary" id="btn-dismiss" data-i18n="dismiss">Loslegen</button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-/** Lit sand-tray renderer — sim at grid res, upscale to screen */
+/** Realistic kinetic-sand tray renderer */
 class SandRenderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -7,6 +7,8 @@ class SandRenderer {
     this.sandCtx = this.sandCanvas.getContext('2d', { alpha: false });
     this.imageData = null;
     this.tray = { cx: 0, cy: 0, radius: 0 };
+    this.armAngle = -Math.PI / 2;
+    this.armVisible = true;
     this.dpr = 1;
   }
 
@@ -17,8 +19,8 @@ class SandRenderer {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    const r = Math.min(width, height) * 0.42;
-    this.tray = { cx: width * 0.5, cy: height * 0.48, radius: r, width, height };
+    const r = Math.min(width, height) * 0.44;
+    this.tray = { cx: width * 0.5, cy: height * 0.5, radius: r, width, height };
   }
 
   render(engine) {
@@ -45,9 +47,9 @@ class SandRenderer {
         const dist = Math.hypot(nx, ny);
 
         if (dist > 1.0) {
-          data[i] = 28;
-          data[i + 1] = 26;
-          data[i + 2] = 24;
+          data[i] = 22;
+          data[i + 1] = 20;
+          data[i + 2] = 18;
           data[i + 3] = 255;
           continue;
         }
@@ -56,20 +58,20 @@ class SandRenderer {
         const hC = engine.heights[idx];
         const hR = engine.heights[engine.idx(x + 1, y)] - hC;
         const hD = engine.heights[engine.idx(x, y + 1)] - hC;
-        let nx3 = -hR * 6.5;
-        let ny3 = -hD * 6.5;
+        let nx3 = -hR * 7.5;
+        let ny3 = -hD * 7.5;
         let nz3 = 1;
-        const invLen = 1 / Math.hypot(nx3, ny3, nz3);
-        nx3 *= invLen;
-        ny3 *= invLen;
-        nz3 *= invLen;
+        const inv = 1 / Math.hypot(nx3, ny3, nz3);
+        nx3 *= inv;
+        ny3 *= inv;
+        nz3 *= inv;
 
         const diffuse = Math.max(0, nx3 * lx + ny3 * ly + nz3 * lz);
-        const spec = Math.pow(Math.max(0, nx3 * 0.2 + ny3 * 0.15 + nz3 * 0.95), 22) * 0.45;
+        const spec = Math.pow(Math.max(0, nx3 * 0.15 + ny3 * 0.1 + nz3 * 0.98), 18) * 0.55;
         const grain = engine.noise[idx];
-        const edge = dist > 0.92 ? (dist - 0.92) / 0.08 : 0;
-        const mound = Math.max(0, hC) * 0.06;
-        const shade = 0.5 + diffuse * 0.48 + spec - edge * 0.25 + grain + mound;
+        const edge = dist > 0.94 ? (dist - 0.94) / 0.06 : 0;
+        const mound = Math.max(0, hC) * 0.09;
+        const shade = 0.48 + diffuse * 0.5 + spec - edge * 0.2 + grain + mound;
 
         data[i] = Math.min(255, br * shade);
         data[i + 1] = Math.min(255, bg * shade);
@@ -79,146 +81,97 @@ class SandRenderer {
     }
 
     this.sandCtx.putImageData(this.imageData, 0, 0);
-    this._drawScene(this.armAngle, this.armVisible);
+    this._drawScene();
   }
 
-  _drawScene(armAngle = null, armVisible = false) {
-    const { ctx, tray } = this;
+  _drawScene() {
+    const { ctx, tray, armAngle, armVisible } = this;
     const { cx, cy, radius, width, height } = tray;
-    ctx.fillStyle = '#1c1a18';
+
+    ctx.fillStyle = '#141210';
     ctx.fillRect(0, 0, width, height);
 
     ctx.save();
     ctx.shadowColor = ZenConfig.TRAY.shadow;
-    ctx.shadowBlur = 28;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowBlur = 32;
+    ctx.shadowOffsetY = 12;
     ctx.beginPath();
-    ctx.arc(cx, cy, radius + 6, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,0,0,0.04)';
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    const d = radius * 2;
-    ctx.drawImage(this.sandCanvas, cx - radius, cy - radius, d, d);
-    ctx.restore();
-
-    const grad = ctx.createRadialGradient(cx - radius * 0.2, cy - radius * 0.25, radius * 0.15, cx, cy, radius);
-    grad.addColorStop(0, 'rgba(255,255,255,0.16)');
-    grad.addColorStop(0.6, 'rgba(255,255,255,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.07)');
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
+    ctx.arc(cx, cy, radius + 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1816';
     ctx.fill();
     ctx.restore();
 
     ctx.beginPath();
-    ctx.arc(cx, cy, radius + 3, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius + 5, 0, Math.PI * 2);
     ctx.strokeStyle = ZenConfig.TRAY.rim;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 10;
     ctx.stroke();
 
-    if (armVisible && armAngle != null) this._drawArm(cx, cy, radius, armAngle);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(this.sandCanvas, cx - radius, cy - radius, radius * 2, radius * 2);
+
+    const gloss = ctx.createRadialGradient(cx - radius * 0.35, cy - radius * 0.3, 0, cx - radius * 0.2, cy - radius * 0.15, radius * 0.7);
+    gloss.addColorStop(0, 'rgba(255,255,255,0.22)');
+    gloss.addColorStop(0.45, 'rgba(255,255,255,0.04)');
+    gloss.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gloss;
+    ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+    ctx.restore();
+
+    if (armVisible) this._drawStick(cx, cy, radius, armAngle);
   }
 
-  _drawArm(cx, cy, trayRadius, angle) {
+  _drawStick(cx, cy, trayRadius, angle) {
     const { ctx } = this;
-    const len = trayRadius * 0.9;
+    const len = trayRadius * 0.96;
     const ex = cx + Math.cos(angle) * len;
     const ey = cy + Math.sin(angle) * len;
-    const nx = -Math.sin(angle);
-    const ny = Math.cos(angle);
-    const wedge = ZenConfig.PLAY.wedge + 0.08;
 
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, len, angle - wedge, angle + wedge);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(255, 248, 235, 0.07)';
-    ctx.fill();
-    ctx.restore();
+    const stickGrad = ctx.createLinearGradient(cx, cy, ex, ey);
+    stickGrad.addColorStop(0, '#8a8078');
+    stickGrad.addColorStop(0.35, '#e8e4dc');
+    stickGrad.addColorStop(0.55, '#ffffff');
+    stickGrad.addColorStop(0.75, '#d8d4cc');
+    stickGrad.addColorStop(1, '#9a9288');
 
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur = 14;
-    ctx.shadowOffsetY = 4;
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 12, 0, Math.PI * 2);
-    ctx.fillStyle = '#3d3530';
-    ctx.fill();
-    ctx.strokeStyle = '#f0e8dc';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
+    ctx.shadowColor = 'rgba(255,255,255,0.35)';
+    ctx.shadowBlur = 6;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(ex, ey);
-    ctx.strokeStyle = '#fff8ef';
-    ctx.lineWidth = 8;
+    ctx.strokeStyle = stickGrad;
+    ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
     ctx.stroke();
 
     ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-    for (let k = -3; k <= 3; k++) {
-      const ox = nx * k * 5;
-      const oy = ny * k * 5;
-      ctx.beginPath();
-      ctx.moveTo(cx + ox * 0.25, cy + oy * 0.25);
-      ctx.lineTo(ex + ox, ey + oy);
-      ctx.strokeStyle = 'rgba(50, 42, 36, 0.7)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
     ctx.beginPath();
-    ctx.arc(ex, ey, 9, 0, Math.PI * 2);
-    ctx.fillStyle = '#2a2420';
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#b0a89c';
     ctx.fill();
-    ctx.strokeStyle = '#d4c8b8';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
     ctx.restore();
   }
 
-  setArm(angle, visible) {
+  setArm(angle, visible = true) {
     this.armAngle = angle;
     this.armVisible = visible;
   }
 
-  drawCursor(x, y, tool, active) {
-    if (!active || tool === 'rings' || tool === 'reset') return;
+  drawCursor(x, y, tool) {
     const { ctx } = this;
     ctx.save();
-    if (tool === 'rake') {
-      ctx.strokeStyle = 'rgba(90, 80, 70, 0.55)';
-      ctx.lineWidth = 2;
-      const w = 22;
-      for (let k = -2; k <= 2; k++) {
-        ctx.beginPath();
-        ctx.moveTo(x - w, y + k * 5);
-        ctx.lineTo(x + w, y + k * 5);
-        ctx.stroke();
-      }
-    } else if (tool === 'pile') {
-      ctx.fillStyle = 'rgba(60, 55, 50, 0.25)';
+    if (tool === 'pile') {
+      ctx.fillStyle = 'rgba(80, 70, 60, 0.2)';
       ctx.beginPath();
-      ctx.arc(x, y, 16, 0, Math.PI * 2);
+      ctx.arc(x, y, 28, 0, Math.PI * 2);
       ctx.fill();
-    } else if (tool === 'smooth') {
-      ctx.strokeStyle = 'rgba(120, 110, 100, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(x, y, 20, 0, Math.PI * 2);
-      ctx.stroke();
     }
     ctx.restore();
   }
