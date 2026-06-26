@@ -103,6 +103,64 @@ html, body {
 
 .btn-icon:active, .btn-back:active { transform: scale(0.96); }
 
+.play-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: calc(max(18px, env(safe-area-inset-bottom)) + 88px);
+  transform: translateX(-50%);
+  z-index: 11;
+}
+
+.btn-play {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  min-height: 52px;
+  border: 1px solid rgba(201, 184, 150, 0.35);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(212, 196, 160, 0.95), rgba(184, 160, 120, 0.92));
+  color: #1c1a18;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 0 0 rgba(201, 184, 150, 0.4);
+  transition: transform 0.15s, box-shadow 0.25s;
+  touch-action: manipulation;
+}
+
+.btn-play .play-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.btn-play.playing {
+  background: linear-gradient(135deg, rgba(160, 145, 120, 0.95), rgba(130, 115, 95, 0.92));
+  color: #f5f2ed;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 24px rgba(201, 184, 150, 0.25);
+  animation: play-pulse 2.4s ease-in-out infinite;
+}
+
+.btn-play.playing .play-icon::before {
+  content: '⏸';
+}
+
+.btn-play.playing .play-icon {
+  font-size: 0;
+}
+
+@keyframes play-pulse {
+  0%, 100% { box-shadow: 0 8px 28px rgba(0,0,0,0.4), 0 0 16px rgba(201,184,150,0.2); }
+  50% { box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 28px rgba(201,184,150,0.35); }
+}
+
+.btn-play:active { transform: scale(0.97); }
+
+#sand-canvas.is-playing { cursor: default; }
+
 .toolbar {
   position: fixed;
   left: 50%;

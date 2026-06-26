@@ -4,7 +4,9 @@ const ZenI18n = {
     de: {
       title: 'Zen Rings',
       tagline: 'Kreise in den Sand ziehen — pure Entspannung',
-      hint: 'Ziehe mit dem Finger oder der Maus durch den Sand',
+      hint: 'Häufe Sand auf — dann Play: der Stab dreht sich und streicht alles glatt.',
+      play_start: 'Play',
+      play_pause: 'Pause',
       tool_rake: 'Harke',
       tool_pile: 'Hügel',
       tool_smooth: 'Glätten',
@@ -18,7 +20,9 @@ const ZenI18n = {
     en: {
       title: 'Zen Rings',
       tagline: 'Rake calming circles in fine sand',
-      hint: 'Drag your finger or mouse through the sand',
+      hint: 'Pile up sand — then hit Play: the arm spins and smooths it flat.',
+      play_start: 'Play',
+      play_pause: 'Pause',
       tool_rake: 'Rake',
       tool_pile: 'Mound',
       tool_smooth: 'Smooth',

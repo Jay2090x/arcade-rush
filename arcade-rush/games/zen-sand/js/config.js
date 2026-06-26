@@ -12,4 +12,13 @@ const ZenConfig = {
   SMOOTH: { passes: 1, mix: 0.38 },
   RINGS: { spacing: 1.35, strength: 0.32, maxRadius: 0.48 },
   TRAY: { rim: '#d8d2ca', shadow: 'rgba(30, 28, 26, 0.28)' },
+  PLAY: {
+    speed: 0.014,
+    innerR: 10,
+    outerFrac: 0.46,
+    rakeStrength: 0.38,
+    levelMix: 0.42,
+    corridor: 5.5,
+    tineCount: 4,
+  },
 };

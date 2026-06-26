@@ -5,6 +5,7 @@
   const intro = document.getElementById('intro');
   const btnDismiss = document.getElementById('btn-dismiss');
   const btnSound = document.getElementById('btn-sound');
+  const btnPlay = document.getElementById('btn-play');
   const toolBtns = [...document.querySelectorAll('[data-tool]')];
 
   let tool = 'rake';
@@ -12,27 +13,67 @@
   let last = null;
   let dirty = true;
   let raf = 0;
-  let moveSpeed = 0;
+  let playing = false;
+  let armAngle = -Math.PI / 2;
+  let lastFrame = 0;
 
   ZenAudio.init();
   ZenI18n.apply();
 
   function setTool(next) {
+    if (playing) return;
     tool = next;
     toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
   }
 
   function markDirty() {
     dirty = true;
+    scheduleFrame();
+  }
+
+  function scheduleFrame() {
     if (!raf) raf = requestAnimationFrame(tick);
   }
 
-  function tick() {
+  function tick(now) {
     raf = 0;
+    const t = now || performance.now();
+
+    if (playing) {
+      const dt = lastFrame ? Math.min(32, t - lastFrame) : 16;
+      armAngle += ZenConfig.PLAY.speed * (dt / 16);
+      const c = engine.center();
+      engine.sweepArm(c.x, c.y, armAngle);
+      if (Math.random() < 0.12) ZenAudio.brush(0.25);
+      renderer.setArm(armAngle, true);
+      dirty = true;
+      scheduleFrame();
+    }
+
+    lastFrame = t;
     if (!dirty) return;
     dirty = false;
     renderer.render(engine);
-    if (last && drawing) renderer.drawCursor(last.sx, last.sy, tool, true);
+    if (last && drawing && !playing) renderer.drawCursor(last.sx, last.sy, tool, true);
+  }
+
+  function setPlaying(on) {
+    playing = on;
+    btnPlay.classList.toggle('playing', on);
+    btnPlay.setAttribute('aria-pressed', on ? 'true' : 'false');
+    const label = ZenI18n.t(on ? 'play_pause' : 'play_start');
+    btnPlay.querySelector('.play-label').textContent = label;
+    renderer.setArm(armAngle, on);
+    canvas.classList.toggle('is-playing', on);
+
+    ZenAudio.ensure();
+    if (on) {
+      ZenAudio.setPlaying(true);
+      lastFrame = 0;
+      scheduleFrame();
+    } else {
+      markDirty();
+    }
   }
 
   function pointerPos(e) {
@@ -44,7 +85,8 @@
   }
 
   function onDown(e) {
-    if (e.target.closest('.ui-panel, .intro-card, a')) return;
+    if (playing) return;
+    if (e.target.closest('.ui-panel, .intro-card, .play-wrap, a')) return;
     e.preventDefault();
     ZenAudio.ensure();
     const p = pointerPos(e);
@@ -71,7 +113,7 @@
   }
 
   function onMove(e) {
-    if (!drawing || tool === 'rings' || tool === 'reset') return;
+    if (playing || !drawing || tool === 'rings' || tool === 'reset') return;
     e.preventDefault();
     const p = pointerPos(e);
     if (!last) {
@@ -82,7 +124,6 @@
     if (tool === 'rake' && p.inside && last.inside) {
       engine.rakeSegment(last.x, last.y, p.x, p.y, ZenConfig.RAKE.strength, ZenConfig.RAKE.tineSpacing, ZenConfig.RAKE.tineCount);
       const speed = Math.hypot(p.x - last.x, p.y - last.y);
-      moveSpeed = speed;
       if (speed > 0.4) ZenAudio.brush(Math.min(1, speed * 0.08));
     } else if (tool === 'pile' && p.inside) {
       engine.pileAt(p.x, p.y, ZenConfig.PILE.strength * 0.35, ZenConfig.PILE.radius * 0.7);
@@ -95,6 +136,7 @@
   }
 
   function onUp() {
+    if (playing) return;
     if (tool === 'smooth' && drawing) engine.smooth(2, ZenConfig.SMOOTH.mix);
     drawing = false;
     last = null;
@@ -102,9 +144,7 @@
   }
 
   function resize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    renderer.resize(w, h);
+    renderer.resize(window.innerWidth, window.innerHeight);
     markDirty();
   }
 
@@ -118,6 +158,12 @@
   });
 
   if (sessionStorage.getItem('zen_sand_intro') === '1') intro.classList.add('hidden');
+
+  btnPlay.addEventListener('click', () => {
+    ZenAudio.ensure();
+    if (ZenAudio.ctx?.state === 'suspended') ZenAudio.ctx.resume();
+    setPlaying(!playing);
+  });
 
   btnSound.addEventListener('click', () => {
     const on = ZenAudio.toggle();

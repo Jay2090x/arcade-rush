@@ -28,6 +28,7 @@ for f in required:
 
 html = (ROOT / "index.html").read_text()
 ok("sand-canvas" in html, "canvas element")
+ok("btn-play" in html, "play button")
 ok("sand-engine.js" in html, "engine script")
 ok("analytics.js" in html, "analytics script")
 
