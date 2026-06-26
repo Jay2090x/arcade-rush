@@ -28,7 +28,8 @@ class SandEngine {
 
   reset() {
     this.heights.fill(0);
-    this.drawConcentricRings(0, 0, ZenConfig.RINGS.spacing, ZenConfig.RINGS.strength, ZenConfig.RINGS.maxRadius);
+    const c = this.center();
+    this.drawConcentricRings(c.x, c.y, ZenConfig.RINGS.spacing, ZenConfig.RINGS.strength, ZenConfig.RINGS.maxRadius);
   }
 
   drawConcentricRings(cx, cy, spacing, strength, maxR) {
@@ -182,8 +183,8 @@ class SandEngine {
     return { x: m, y: m };
   }
 
-  /** Rotating arm: rake outward and level piled sand along the sweep */
-  sweepArm(cx, cy, angle) {
+  /** Rotating arm: rake outward and flatten piled sand in a wide blade */
+  sweepArm(cx, cy, angle, prevAngle) {
     const cfg = ZenConfig.PLAY;
     const outerR = this.size * cfg.outerFrac;
     const cos = Math.cos(angle);
@@ -193,8 +194,54 @@ class SandEngine {
     const x1 = cx + cos * outerR;
     const y1 = cy + sin * outerR;
 
-    this.rakeSegment(x0, y0, x1, y1, cfg.rakeStrength, 0.5, cfg.tineCount);
+    this.rakeSegment(x0, y0, x1, y1, cfg.rakeStrength, 0.48, cfg.tineCount);
     this._levelCorridor(cx, cy, angle, cfg.innerR, outerR, cfg.corridor, cfg.levelMix);
+    if (prevAngle != null) {
+      this._flattenWedge(cx, cy, prevAngle, angle, cfg.innerR, outerR, cfg.levelMix);
+    }
+  }
+
+  _angleDiff(a, b) {
+    let d = a - b;
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    return d;
+  }
+
+  _flattenWedge(cx, cy, a0, a1, innerR, outerR, mix) {
+    const s = this.size;
+    const half = Math.max(Math.abs(this._angleDiff(a1, a0)) * 1.2, ZenConfig.PLAY.wedge);
+    const mid = a1;
+    const minX = Math.max(0, Math.floor(cx - outerR - 2));
+    const maxX = Math.min(s - 1, Math.ceil(cx + outerR + 2));
+    const minY = Math.max(0, Math.floor(cy - outerR - 2));
+    const maxY = Math.min(s - 1, Math.ceil(cy + outerR + 2));
+
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const nx = (x - (s - 1) * 0.5) / (s * 0.5);
+        const ny = (y - (s - 1) * 0.5) / (s * 0.5);
+        if (!this.inCircle(nx, ny)) continue;
+
+        const rx = x - cx;
+        const ry = y - cy;
+        const dist = Math.hypot(rx, ry);
+        if (dist < innerR || dist > outerR) continue;
+
+        const cellA = Math.atan2(ry, rx);
+        const diff = Math.abs(this._angleDiff(cellA, mid));
+        if (diff > half) continue;
+
+        const falloff = (1 - diff / half) * (1 - Math.abs(dist - outerR * 0.5) / (outerR * 0.5));
+        const i = this.idx(x, y);
+        const h = this.heights[i];
+        if (h > 0) {
+          this.heights[i] = h * (1 - mix * Math.max(0.35, falloff));
+        } else {
+          this.heights[i] = h * (1 - mix * 0.25 * falloff);
+        }
+      }
+    }
   }
 
   _levelCorridor(cx, cy, angle, innerR, outerR, width, mix) {
@@ -221,7 +268,12 @@ class SandEngine {
 
         const falloff = 1 - perp / width;
         const i = this.idx(x, y);
-        this.heights[i] *= 1 - mix * falloff;
+        const h = this.heights[i];
+        if (h > 0) {
+          this.heights[i] = h * (1 - mix * falloff);
+        } else {
+          this.heights[i] = h * (1 - mix * 0.35 * falloff);
+        }
       }
     }
   }

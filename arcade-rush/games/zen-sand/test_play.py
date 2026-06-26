@@ -47,7 +47,7 @@ try:
           return null;
         }''')
 
-        page.click('#btn-play')
+        page.locator('#btn-play').dispatch_event('pointerup')
         page.wait_for_timeout(200)
         playing = page.evaluate('() => document.getElementById("btn-play").classList.contains("playing")')
         if not playing:

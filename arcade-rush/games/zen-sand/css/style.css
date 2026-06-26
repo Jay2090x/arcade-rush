@@ -26,6 +26,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
 }
 
 #sand-canvas {
@@ -37,6 +38,14 @@ html, body {
   z-index: 0;
   cursor: crosshair;
   touch-action: none;
+  pointer-events: auto;
+}
+
+#ui-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
 }
 
 .top-bar {
@@ -49,7 +58,6 @@ html, body {
   justify-content: space-between;
   padding: max(14px, env(safe-area-inset-top)) 16px 0;
   pointer-events: none;
-  z-index: 10;
 }
 
 .brand {
@@ -113,7 +121,6 @@ html, body {
   left: 50%;
   bottom: calc(max(18px, env(safe-area-inset-bottom)) + 88px);
   transform: translateX(-50%);
-  z-index: 50;
   pointer-events: auto;
 }
 
@@ -183,9 +190,16 @@ html, body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 28px;
-  z-index: 50;
   pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+
+.top-bar, .play-wrap, .toolbar {
+  pointer-events: none;
+}
+
+.top-bar .brand, .top-actions, .btn-play, .tool-btn {
+  pointer-events: auto;
 }
 
 .tool-btn {
@@ -220,7 +234,7 @@ html, body {
 .intro-overlay {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;

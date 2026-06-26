@@ -129,54 +129,63 @@ class SandRenderer {
 
   _drawArm(cx, cy, trayRadius, angle) {
     const { ctx } = this;
-    const len = trayRadius * 0.88;
+    const len = trayRadius * 0.9;
     const ex = cx + Math.cos(angle) * len;
     const ey = cy + Math.sin(angle) * len;
     const nx = -Math.sin(angle);
     const ny = Math.cos(angle);
+    const wedge = ZenConfig.PLAY.wedge + 0.08;
 
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.25)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, len, angle - wedge, angle + wedge);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 248, 235, 0.07)';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 4;
 
     ctx.beginPath();
-    ctx.arc(cx, cy, 9, 0, Math.PI * 2);
-    ctx.fillStyle = '#6b5d52';
+    ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+    ctx.fillStyle = '#3d3530';
     ctx.fill();
-    ctx.strokeStyle = '#8a7a6c';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#f0e8dc';
+    ctx.lineWidth = 3;
     ctx.stroke();
 
-    const grad = ctx.createLinearGradient(cx, cy, ex, ey);
-    grad.addColorStop(0, '#7a6b5e');
-    grad.addColorStop(0.6, '#a0907f');
-    grad.addColorStop(1, '#c4b5a3');
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(ex, ey);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#fff8ef';
+    ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.stroke();
 
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
-    for (let k = -2; k <= 2; k++) {
-      const ox = nx * k * 4;
-      const oy = ny * k * 4;
+    for (let k = -3; k <= 3; k++) {
+      const ox = nx * k * 5;
+      const oy = ny * k * 5;
       ctx.beginPath();
-      ctx.moveTo(cx + ox * 0.3, cy + oy * 0.3);
+      ctx.moveTo(cx + ox * 0.25, cy + oy * 0.25);
       ctx.lineTo(ex + ox, ey + oy);
-      ctx.strokeStyle = 'rgba(70, 62, 55, 0.55)';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(50, 42, 36, 0.7)';
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
 
     ctx.beginPath();
-    ctx.arc(ex, ey, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#5a4f45';
+    ctx.arc(ex, ey, 9, 0, Math.PI * 2);
+    ctx.fillStyle = '#2a2420';
     ctx.fill();
+    ctx.strokeStyle = '#d4c8b8';
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.restore();
   }
 

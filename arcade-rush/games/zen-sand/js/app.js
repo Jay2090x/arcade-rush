@@ -12,10 +12,13 @@
   let drawing = false;
   let last = null;
   let dirty = true;
-  let loopId = 0;
+  let idleLoop = 0;
+  let playLoop = 0;
   let playing = false;
   let armAngle = -Math.PI / 2;
-  let lastFrame = 0;
+  let prevArmAngle = -Math.PI / 2;
+  let lastPlayFrame = 0;
+  let playTapLock = 0;
 
   ZenAudio.init();
   ZenI18n.apply();
@@ -31,50 +34,59 @@
     toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
   }
 
-  function startLoop() {
-    if (loopId) return;
-    loopId = requestAnimationFrame(loop);
+  function renderFrame() {
+    renderer.render(engine);
+    if (last && drawing && !playing) {
+      renderer.drawCursor(last.sx, last.sy, tool, true);
+    }
   }
 
-  function stopLoop() {
-    if (!playing && !dirty) {
-      cancelAnimationFrame(loopId);
-      loopId = 0;
-    }
+  function idleTick() {
+    idleLoop = 0;
+    if (playing) return;
+    if (!dirty) return;
+    dirty = false;
+    renderFrame();
   }
 
   function markDirty() {
+    if (playing) return;
     dirty = true;
-    startLoop();
+    if (!idleLoop) idleLoop = requestAnimationFrame(idleTick);
   }
 
-  function updatePlay(now) {
+  function playTick(now) {
+    if (!playing) {
+      playLoop = 0;
+      return;
+    }
+    playLoop = requestAnimationFrame(playTick);
+
     const t = now || performance.now();
-    const dt = lastFrame ? Math.min(40, t - lastFrame) : 16;
-    lastFrame = t;
+    const dt = lastPlayFrame ? Math.min(50, t - lastPlayFrame) : 16;
+    lastPlayFrame = t;
+
+    prevArmAngle = armAngle;
     armAngle += ZenConfig.PLAY.speed * (dt / 16);
+
     const c = engine.center();
-    engine.sweepArm(c.x, c.y, armAngle);
-    if (Math.random() < 0.15) ZenAudio.brush(0.3);
+    engine.sweepArm(c.x, c.y, armAngle, prevArmAngle);
+    if (Math.random() < 0.18) ZenAudio.brush(0.35);
+
     renderer.setArm(armAngle, true);
+    renderFrame();
   }
 
-  function loop(now) {
-    loopId = requestAnimationFrame(loop);
+  function startPlayLoop() {
+    if (playLoop) return;
+    lastPlayFrame = 0;
+    prevArmAngle = armAngle;
+    playLoop = requestAnimationFrame(playTick);
+  }
 
-    if (playing) updatePlay(now);
-    if (playing || dirty) {
-      renderer.render(engine);
-      if (last && drawing && !playing) {
-        renderer.drawCursor(last.sx, last.sy, tool, true);
-      }
-      dirty = false;
-    }
-
-    if (!playing && !dirty) {
-      cancelAnimationFrame(loopId);
-      loopId = 0;
-    }
+  function stopPlayLoop() {
+    if (playLoop) cancelAnimationFrame(playLoop);
+    playLoop = 0;
   }
 
   function setPlaying(on) {
@@ -85,25 +97,29 @@
     renderer.setArm(armAngle, on);
     canvas.classList.toggle('is-playing', on);
 
-    ZenAudio.ensure();
-    if (ZenAudio.ctx?.state === 'suspended') ZenAudio.ctx.resume();
+    try {
+      ZenAudio.ensure();
+      if (ZenAudio.ctx?.state === 'suspended') ZenAudio.ctx.resume();
+      if (on) ZenAudio.setPlaying(true);
+    } catch (_) {}
+
     if (on) {
-      ZenAudio.setPlaying(true);
-      lastFrame = 0;
-      startLoop();
+      startPlayLoop();
     } else {
+      stopPlayLoop();
       markDirty();
     }
   }
 
-  function onPlayTap(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  function togglePlay() {
+    const now = Date.now();
+    if (now - playTapLock < 350) return;
+    playTapLock = now;
     dismissIntro();
-    ZenAudio.ensure();
-    if (ZenAudio.ctx?.state === 'suspended') ZenAudio.ctx.resume();
     setPlaying(!playing);
   }
+
+  window.zenTogglePlay = togglePlay;
 
   function pointerPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -136,9 +152,7 @@
       drawing = false;
       return;
     }
-    if (tool === 'pile' && p.inside) {
-      engine.pileAt(p.x, p.y);
-    }
+    if (tool === 'pile' && p.inside) engine.pileAt(p.x, p.y);
     markDirty();
   }
 
@@ -188,7 +202,11 @@
   btnDismiss.addEventListener('click', dismissIntro);
   if (sessionStorage.getItem('zen_sand_intro') === '1') intro.classList.add('hidden');
 
-  btnPlay.addEventListener('click', onPlayTap);
+  btnPlay.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePlay();
+  }, { passive: false });
 
   btnSound.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -206,7 +224,7 @@
 
   window.addEventListener('resize', resize);
   resize();
-  startLoop();
+  markDirty();
 
   if (window.ArcadeAnalytics) {
     ArcadeAnalytics.track('game_start', { game: 'zen-sand' });

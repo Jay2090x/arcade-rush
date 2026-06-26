@@ -14,7 +14,9 @@
 <body>
   <div id="app">
     <canvas id="sand-canvas"></canvas>
+  </div>
 
+  <div id="ui-root">
     <header class="top-bar">
       <div class="brand">
         <h1 data-i18n="title">Zen Rings</h1>
@@ -26,14 +28,14 @@
       </div>
     </header>
 
-    <div class="play-wrap ui-panel">
+    <div class="play-wrap">
       <button type="button" class="btn-play" id="btn-play" aria-pressed="false">
-        <span class="play-icon">▶</span>
+        <span class="play-icon" aria-hidden="true">▶</span>
         <span class="play-label" data-i18n="play_start">Play</span>
       </button>
     </div>
 
-    <nav class="toolbar ui-panel" aria-label="Werkzeuge">
+    <nav class="toolbar" aria-label="Werkzeuge">
       <button type="button" class="tool-btn active" data-tool="rake" data-i18n-title="tool_rake">
         <span class="icon">〰️</span>
         <span data-i18n="tool_rake">Harke</span>
