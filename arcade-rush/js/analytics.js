@@ -5,6 +5,7 @@ const ArcadeAnalytics = {
   STATS_URL: '/.netlify/functions/stats',
   globalVisits: null,
   globalStarts: null,
+  globalGameStats: {},
 
   _ready: false,
 
@@ -13,7 +14,8 @@ const ArcadeAnalytics = {
     this._ready = true;
     this.session = this.getSession();
     this.data = this.load();
-    this.track('page_view', { page: location.pathname });
+    const game = this.gameFromPath(location.pathname);
+    this.track('page_view', { page: location.pathname, game });
     this.fetchGlobalCounts();
     this.flush();
   },
@@ -22,14 +24,33 @@ const ArcadeAnalytics = {
     if (!this._ready) this.init();
   },
 
+  gameFromPath(path) {
+    const m = (path || '').match(/\/games\/([a-z0-9-]+)/);
+    return m ? m[1] : null;
+  },
+
+  async fetchStat(key) {
+    const res = await fetch(`${this.STATS_URL}?key=${encodeURIComponent(key)}`);
+    const data = await res.json();
+    return data.value;
+  },
+
   async fetchGlobalCounts() {
+    const keys = [
+      'visits', 'game-starts',
+      'game-vatreni-bro-visits', 'game-vatreni-bro-starts',
+    ];
     try {
-      const [v, s] = await Promise.all([
-        fetch(`${this.STATS_URL}?key=visits`).then(r => r.json()),
-        fetch(`${this.STATS_URL}?key=game-starts`).then(r => r.json()),
-      ]);
-      this.globalVisits = v.value ?? 0;
-      this.globalStarts = s.value ?? 0;
+      const results = await Promise.all(keys.map(k => this.fetchStat(k).catch(() => null)));
+      const map = Object.fromEntries(keys.map((k, i) => [k, results[i]]));
+      this.globalVisits = map.visits ?? 0;
+      this.globalStarts = map['game-starts'] ?? 0;
+      this.globalGameStats = {
+        'vatreni-bro': {
+          visits: map['game-vatreni-bro-visits'],
+          starts: map['game-vatreni-bro-starts'],
+        },
+      };
       this.updateGlobalUI();
     } catch (_) {
       this.updateGlobalUI();
@@ -45,14 +66,27 @@ const ArcadeAnalytics = {
     document.querySelectorAll('[data-global-starts]').forEach(el => {
       el.textContent = s != null ? s : '–';
     });
+    document.querySelectorAll('[data-game-visits]').forEach(el => {
+      const game = el.getAttribute('data-game-visits');
+      const val = this.globalGameStats[game]?.visits;
+      el.textContent = val != null ? val : '–';
+    });
   },
 
   async hitGlobal(key) {
     try {
       const res = await fetch(`${this.STATS_URL}?key=${encodeURIComponent(key)}`, { method: 'POST' });
       const data = await res.json();
-      if (key === 'visits') this.globalVisits = data.value ?? this.globalVisits;
-      if (key === 'game-starts') this.globalStarts = data.value ?? this.globalStarts;
+      if (data.value == null) return;
+      if (key === 'visits') this.globalVisits = data.value;
+      if (key === 'game-starts') this.globalStarts = data.value;
+      const gm = key.match(/^game-([a-z0-9-]+)-(visits|starts)$/);
+      if (gm) {
+        const game = gm[1];
+        const field = gm[2];
+        if (!this.globalGameStats[game]) this.globalGameStats[game] = {};
+        this.globalGameStats[game][field] = data.value;
+      }
       this.updateGlobalUI();
     } catch (_) {}
   },
@@ -78,6 +112,7 @@ const ArcadeAnalytics = {
     return {
       visits: 0,
       uniqueSessions: [],
+      gameVisits: {},
       gameStarts: {},
       gameOvers: {},
       totalPlayTimeSec: 0,
@@ -110,10 +145,20 @@ const ArcadeAnalytics = {
         this.data.uniqueSessions.push(this.session);
         this.hitGlobal('visits');
       }
+      const game = props.game || this.gameFromPath(location.pathname);
+      if (game) {
+        const sk = `arcade_game_visit_${game}`;
+        if (!sessionStorage.getItem(sk)) {
+          sessionStorage.setItem(sk, '1');
+          this.data.gameVisits[game] = (this.data.gameVisits[game] || 0) + 1;
+          this.hitGlobal(`game-${game}-visits`);
+        }
+      }
     }
     if (event === 'game_start' && props.game) {
       this.data.gameStarts[props.game] = (this.data.gameStarts[props.game] || 0) + 1;
       this.hitGlobal('game-starts');
+      this.hitGlobal(`game-${props.game}-starts`);
     }
     if (event === 'game_over' && props.game) {
       if (!this.data.gameOvers[props.game]) this.data.gameOvers[props.game] = [];
@@ -147,19 +192,26 @@ const ArcadeAnalytics = {
     const skyStarts = d.gameStarts['sky-drift'] || 0;
     const goldStarts = d.gameStarts['goldgraeber'] || 0;
     const stackStarts = d.gameStarts['neon-stack'] || 0;
+    const vatreniStarts = d.gameStarts['vatreni-bro'] || 0;
+    const vatreniVisits = d.gameVisits?.['vatreni-bro'] || 0;
     const skyScores = (d.gameOvers['sky-drift'] || []).map(g => g.score);
     const avgSky = skyScores.length ? (skyScores.reduce((a, b) => a + b, 0) / skyScores.length).toFixed(1) : '–';
     const daysSinceFirst = Math.max(1, Math.ceil((Date.now() - d.firstVisit) / 86400000));
+    const vb = this.globalGameStats['vatreni-bro'] || {};
 
     return {
       visits: d.visits,
       globalVisits: this.globalVisits,
       globalStarts: this.globalStarts,
+      globalVatreniVisits: vb.visits,
+      globalVatreniStarts: vb.starts,
       uniqueSessions: unique,
       skyStarts,
       goldStarts,
       stackStarts,
-      totalStarts: skyStarts + goldStarts + stackStarts,
+      vatreniStarts,
+      vatreniVisits,
+      totalStarts: skyStarts + goldStarts + stackStarts + vatreniStarts,
       avgSkyScore: avgSky,
       totalPlayMin: Math.round(d.totalPlayTimeSec / 60),
       visitsPerDay: (d.visits / daysSinceFirst).toFixed(1),

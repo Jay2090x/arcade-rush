@@ -9,9 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initShare();
 
   setTimeout(() => {
-    const s = ArcadeAnalytics.getSummary();
-    if (s.globalVisits != null) document.getElementById('stat-visits').textContent = s.globalVisits;
-    if (s.globalStarts != null) document.getElementById('stat-plays').textContent = s.globalStarts;
+    ArcadeAnalytics.fetchGlobalCounts();
   }, 800);
 
   document.querySelectorAll('.game-card[data-game]').forEach(card => {

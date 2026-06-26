@@ -36,6 +36,10 @@ function render() {
     <div class="kpi"><span class="kpi-val">${s.skyStarts}</span><span class="kpi-label">Sky Drift</span></div>
     <div class="kpi"><span class="kpi-val">${s.goldStarts}</span><span class="kpi-label">Goldgräber</span></div>
     <div class="kpi"><span class="kpi-val">${s.stackStarts || 0}</span><span class="kpi-label">Neon Stack</span></div>
+    <div class="kpi highlight"><span class="kpi-val">${s.globalVatreniVisits ?? '…'}</span><span class="kpi-label">🔥 Vatreni Besuche (global)</span></div>
+    <div class="kpi highlight"><span class="kpi-val">${s.globalVatreniStarts ?? '…'}</span><span class="kpi-label">🔥 Vatreni Starts (global)</span></div>
+    <div class="kpi"><span class="kpi-val">${s.vatreniVisits || 0}</span><span class="kpi-label">Vatreni (dein Browser)</span></div>
+    <div class="kpi"><span class="kpi-val">${s.vatreniStarts || 0}</span><span class="kpi-label">Vatreni Starts (lokal)</span></div>
     <div class="kpi"><span class="kpi-val">${s.avgSkyScore}</span><span class="kpi-label">Sky Drift Ø Score</span></div>
     <div class="kpi"><span class="kpi-val">${s.totalPlayMin}</span><span class="kpi-label">Spielzeit (Min)</span></div>
     <div class="kpi"><span class="kpi-val">${s.daysSinceFirst}</span><span class="kpi-label">Tage aktiv</span></div>
