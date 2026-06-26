@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1c1a18">
+  <meta name="description" content="Zen Rings — beruhigendes Sandkunst-Spiel. Ziehe Kreise und Muster in feinen Sand. Pure Entspannung im Browser.">
+  <title>Zen Rings — Sand Entspannung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="sand-canvas"></canvas>
+
+    <header class="top-bar">
+      <div class="brand">
+        <h1 data-i18n="title">Zen Rings</h1>
+        <p data-i18n="tagline">Kreise in den Sand ziehen</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn-icon" id="btn-sound" aria-label="Sound">🔊</button>
+        <a class="btn-back" href="../../" data-i18n="back">Zurück</a>
+      </div>
+    </header>
+
+    <nav class="toolbar ui-panel" aria-label="Werkzeuge">
+      <button type="button" class="tool-btn active" data-tool="rake" data-i18n-title="tool_rake">
+        <span class="icon">〰️</span>
+        <span data-i18n="tool_rake">Harke</span>
+      </button>
+      <button type="button" class="tool-btn" data-tool="pile" data-i18n-title="tool_pile">
+        <span class="icon">⛰️</span>
+        <span data-i18n="tool_pile">Hügel</span>
+      </button>
+      <button type="button" class="tool-btn" data-tool="smooth" data-i18n-title="tool_smooth">
+        <span class="icon">🌊</span>
+        <span data-i18n="tool_smooth">Glätten</span>
+      </button>
+      <button type="button" class="tool-btn" data-tool="rings" data-i18n-title="tool_rings">
+        <span class="icon">◎</span>
+        <span data-i18n="tool_rings">Kreise</span>
+      </button>
+      <button type="button" class="tool-btn" data-tool="reset" data-i18n-title="tool_reset">
+        <span class="icon">↺</span>
+        <span data-i18n="tool_reset">Neu</span>
+      </button>
+    </nav>
+
+    <div class="intro-overlay" id="intro">
+      <div class="intro-card">
+        <h2 data-i18n="title">Zen Rings</h2>
+        <p data-i18n="hint">Ziehe mit dem Finger oder der Maus durch den Sand</p>
+        <button type="button" class="btn-primary" id="btn-dismiss" data-i18n="dismiss">Loslegen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/analytics.js" onerror="void 0"></script>
+  <script src="js/config.js"></script>
+  <script src="js/sand-engine.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

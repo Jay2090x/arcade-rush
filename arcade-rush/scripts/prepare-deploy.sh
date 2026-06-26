@@ -54,6 +54,7 @@ cat > "$ROOT/sitemap.xml" << EOF
   <url><loc>$SITE_URL/games/goldgraeber/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/games/neon-stack/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/games/vatreni-bro/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
+  <url><loc>$SITE_URL/games/zen-sand/</loc><lastmod>$TODAY</lastmod><priority>0.9</priority></url>
   <url><loc>$SITE_URL/datenschutz.html</loc><lastmod>$TODAY</lastmod><priority>0.3</priority></url>
 </urlset>
 EOF

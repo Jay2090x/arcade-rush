@@ -311,6 +311,7 @@ body {
   flex-shrink: 0;
 }
 
+.card-visual.zen { background: linear-gradient(135deg, #e8e4df, #c9b896, #8a7f72); }
 .card-visual.kick { background: linear-gradient(135deg, #C8102E, #ffffff 45%, #C8102E); }
 .card-visual.sky { background: linear-gradient(135deg, #3949ab, #64b5f6); }
 .card-visual.gold { background: linear-gradient(135deg, #b8860b, #ffd700); }
