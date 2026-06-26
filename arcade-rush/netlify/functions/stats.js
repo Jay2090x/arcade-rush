@@ -10,6 +10,7 @@ const API = 'https://api.counterapi.dev/v1';
 
 async function readCount(key) {
   const res = await fetch(`${API}/${NAMESPACE}/${key}/`);
+  if (res.status === 400 || res.status === 404) return 0;
   if (!res.ok) throw new Error(`read ${res.status}`);
   const data = await res.json();
   return data.count ?? 0;
