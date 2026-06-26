@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Arcade Rush TikTok — 4s Hub-Promo, große Website, URL oben."""
+"""Arcade Rush TikTok — 4s Vatreni pur, dann 15s mit Website-Einblendung oben."""
 import os
 import shutil
 import subprocess
@@ -12,46 +12,34 @@ OUT_DIR = Path("/Users/josip/Downloads")
 FRAMES_DIR = OUT_DIR / "tiktok-site-frames"
 FINAL_MP4 = OUT_DIR / "tiktok-arcade-rush.mp4"
 FFMPEG = os.path.expanduser("~/.local/bin/ffmpeg")
-HUB_URL = "https://arcade-rush.netlify.app/"
+GAME_URL = "https://arcade-rush.netlify.app/games/vatreni-bro/"
 FPS = 30
-DURATION_SEC = 4
-TOTAL_FRAMES = FPS * DURATION_SEC
+PART1_SEC = 4
+PART2_SEC = 15
+TOTAL_FRAMES = FPS * (PART1_SEC + PART2_SEC)
+PART1_FRAMES = FPS * PART1_SEC
 
-HUB_SETUP_JS = r"""
+GAME_SETUP_JS = r"""
 (() => {
   if (document.getElementById('tt-style')) return;
   const style = document.createElement('style');
   style.id = 'tt-style';
   style.textContent = `
-    html, body {
-      overflow: hidden !important;
-      background: #070b18 !important;
-    }
-    .hub-toolbar, .hub-footer, #share-modal, #share-toast { display: none !important; }
-    .hub {
-      transform: scale(1.28);
-      transform-origin: top center;
-      will-change: transform;
-      padding-top: 118px;
-      padding-bottom: 40px;
-    }
-    .hero { padding-top: 12px !important; }
-    .hero h1 { font-size: 2.5rem !important; }
-    .hero-sub { font-size: 1rem !important; }
-    .hero-stats { display: none !important; }
-    .game-card.tt-pulse {
-      box-shadow: 0 0 0 3px #FFD54F, 0 16px 48px rgba(255,213,79,0.35) !important;
-      transform: scale(1.03) !important;
-    }
+    .overlay, .tutorial-overlay, .btn-lang, .btn-sound { display: none !important; }
+    #hud { opacity: 1 !important; }
+    .hud-top .best-pill { display: none !important; }
+    .score-panel { margin-top: 88px !important; }
     .tt-safe-top {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 34%;
+      height: 32%;
       z-index: 9998;
       pointer-events: none;
+      opacity: var(--tt-site-opacity, 0);
+      transition: opacity 0.45s ease-out;
       background: linear-gradient(180deg,
         rgba(6,12,28,0.82) 0%,
-        rgba(6,12,28,0.45) 60%,
+        rgba(6,12,28,0.42) 58%,
         transparent 100%);
     }
     .tt-brand {
@@ -64,6 +52,8 @@ HUB_SETUP_JS = r"""
       align-items: center;
       gap: 8px;
       padding: 0 18px;
+      opacity: var(--tt-site-opacity, 0);
+      transition: opacity 0.45s ease-out;
     }
     .tt-pill {
       font: 900 20px/1.2 Outfit, system-ui, sans-serif;
@@ -91,6 +81,28 @@ HUB_SETUP_JS = r"""
       border: 1px solid rgba(255,224,130,0.42);
       backdrop-filter: blur(8px);
     }
+    .tt-flash {
+      position: fixed;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.75);
+      z-index: 9999;
+      pointer-events: none;
+      font: 900 56px/1 Outfit, system-ui, sans-serif;
+      color: #FFD54F;
+      opacity: 0;
+      text-shadow: 0 0 32px rgba(255,213,79,0.95), 0 4px 20px rgba(0,0,0,0.9);
+      transition: opacity 0.1s, transform 0.22s cubic-bezier(0.2,1.2,0.4,1);
+    }
+    .tt-flash.show {
+      opacity: 1;
+      transform: translate(-50%, -56%) scale(1.1);
+    }
+    #score.bump {
+      transform: scale(1.3) !important;
+      color: #FFE082 !important;
+      transition: transform 0.14s ease-out, color 0.14s;
+    }
   `;
   document.head.appendChild(style);
 
@@ -101,30 +113,102 @@ HUB_SETUP_JS = r"""
   const brand = document.createElement('div');
   brand.className = 'tt-brand';
   brand.innerHTML = `
-    <div class="tt-pill">4 Spiele · kostenlos 🎮</div>
-    <div class="tt-sub">Direkt im Browser — kein Download</div>
+    <div class="tt-pill">Schaffst du 20? 🔥🇭🇷</div>
+    <div class="tt-sub">Kostenlos im Browser — kein Download</div>
     <div class="tt-url">arcade-rush.netlify.app</div>
   `;
   document.body.appendChild(brand);
+
+  const flash = document.createElement('div');
+  flash.className = 'tt-flash';
+  flash.id = 'tt-flash';
+  flash.textContent = 'PERFECT!';
+  document.body.appendChild(flash);
+
+  window.__lastScore = 0;
+  window.__lastCombo = 0;
 })();
 """
 
-HUB_TICK_JS = r"""
+GAME_TICK_JS = r"""
 (frame) => {
-  const hub = document.querySelector('.hub');
-  const cards = [...document.querySelectorAll('.game-card')];
-  if (!hub) return;
+  if (!window.__ttFrames) window.__ttFrames = { flash: 0, bump: 0, combo: 0 };
+  const tt = window.__ttFrames;
+  if (tt.flash > 0) tt.flash--;
+  if (tt.bump > 0) tt.bump--;
+  if (tt.combo > 0) tt.combo--;
 
-  const t = frame / 30;
-  const dur = 4;
-  const p = Math.min(t / dur, 1);
-  const scroll = p * p * 220;
-  const pulseIdx = Math.min(3, Math.floor(p * 4));
+  const part1End = 4 * 30;
+  let siteOpacity = 0;
+  if (frame >= part1End) {
+    const fade = Math.min((frame - part1End) / 18, 1);
+    siteOpacity = fade;
+  }
+  document.documentElement.style.setProperty('--tt-site-opacity', String(siteOpacity));
 
-  hub.style.transform = `scale(1.28) translateY(${-scroll}px)`;
-  cards.forEach((c, i) => c.classList.toggle('tt-pulse', i === pulseIdx));
-  return { scroll, pulseIdx };
+  const sync = () => {
+    const f = document.getElementById('tt-flash');
+    const s = document.getElementById('score');
+    if (f) f.classList.toggle('show', tt.flash > 0);
+    if (s) s.classList.toggle('bump', tt.bump > 0);
+  };
+
+  if (typeof Game === 'undefined' || Game.state !== 'playing') {
+    sync();
+    return { score: 0, combo: 0, state: typeof Game !== 'undefined' ? Game.state : null };
+  }
+
+  const ball = Game.ball;
+  const head = Game.headPoint();
+  if (Game.awaitingHeader && !Game.headerDone && ball.vy > 0) {
+    if (Game.perfectReady || (Game.headerReady && ball.y > head.y - 8)) {
+      Game.tryHeader();
+    }
+  }
+
+  Game.update();
+  Game.renderer.render(Game.getRenderState());
+
+  const score = Game.score;
+  const combo = Game.combo;
+  const el = document.getElementById('score');
+  const cel = document.getElementById('combo');
+  const mel = document.getElementById('mult-pill');
+  if (el) el.textContent = String(score);
+  if (cel) cel.textContent = String(combo);
+  if (mel) mel.textContent = `x${Game.multiplier}`;
+
+  if (score > window.__lastScore) {
+    window.__lastScore = score;
+    tt.flash = 14;
+    tt.bump = 8;
+  }
+  if (combo > window.__lastCombo && combo >= 2) {
+    window.__lastCombo = combo;
+    tt.combo = 18;
+  }
+  sync();
+  return { score, combo, state: Game.state };
 }
+"""
+
+GAME_START_JS = r"""
+(() => {
+  Game.start();
+  Game.state = 'playing';
+  Game.resetEntities();
+  Game.ball.vy = 2.6;
+  window.__lastScore = 0;
+  window.__lastCombo = 0;
+  window.__ttFrames = { flash: 0, bump: 0, combo: 0 };
+  document.documentElement.style.setProperty('--tt-site-opacity', '0');
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+  document.getElementById('hud').classList.add('visible');
+  document.getElementById('score').textContent = '0';
+  document.getElementById('combo').textContent = '0';
+  if (document.getElementById('mult-pill')) document.getElementById('mult-pill').textContent = 'x1';
+  Game.beginLoop();
+})();
 """
 
 
@@ -140,15 +224,27 @@ def render_frames():
             device_scale_factor=2,
         )
 
-        page.goto(HUB_URL, wait_until="networkidle", timeout=45000)
+        page.goto(GAME_URL, wait_until="networkidle", timeout=45000)
         time.sleep(0.8)
-        page.evaluate(HUB_SETUP_JS)
+        page.evaluate(GAME_SETUP_JS)
+        page.evaluate(GAME_START_JS)
+        time.sleep(0.3)
 
+        max_score = 0
+        max_combo = 0
         for i in range(TOTAL_FRAMES):
-            page.evaluate(HUB_TICK_JS, i)
+            result = page.evaluate(GAME_TICK_JS, i)
+            if result.get("state") == "dead" and i > FPS * 2:
+                page.evaluate(GAME_START_JS)
+                result = page.evaluate(GAME_TICK_JS, i)
+            max_score = max(max_score, result.get("score", 0))
+            max_combo = max(max_combo, result.get("combo", 0))
             page.screenshot(path=str(FRAMES_DIR / f"frame_{i:04d}.png"))
 
+        print(f"  Max score: {max_score}  |  Max combo: {max_combo}")
         browser.close()
+
+    return max_score, max_combo
 
 
 def export_mp4():
@@ -173,14 +269,17 @@ def export_mp4():
 
 
 def main():
-    print(f"▶ Arcade Rush TikTok — {TOTAL_FRAMES} frames ({DURATION_SEC}s)")
-    print(f"  Hub: {HUB_URL}")
-    render_frames()
+    total = PART1_SEC + PART2_SEC
+    print(f"▶ Arcade Rush TikTok — {TOTAL_FRAMES} frames ({total}s)")
+    print(f"  Teil 1: {PART1_SEC}s Vatreni (ohne Website)")
+    print(f"  Teil 2: {PART2_SEC}s Vatreni + Website-Einblendung oben")
+    max_score, max_combo = render_frames()
     print("▶ Export MP4 …")
     export_mp4()
     shutil.rmtree(FRAMES_DIR, ignore_errors=True)
     size_mb = FINAL_MP4.stat().st_size / (1024 * 1024)
     print(f"✓ Fertig: {FINAL_MP4} ({size_mb:.1f} MB)")
+    print(f"  Peak: {max_score} pts · combo {max_combo}")
 
 
 if __name__ == "__main__":
