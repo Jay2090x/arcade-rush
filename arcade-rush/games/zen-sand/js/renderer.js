@@ -56,8 +56,8 @@ class SandRenderer {
         const hC = engine.heights[idx];
         const hR = engine.heights[engine.idx(x + 1, y)] - hC;
         const hD = engine.heights[engine.idx(x, y + 1)] - hC;
-        let nx3 = -hR * 2.2;
-        let ny3 = -hD * 2.2;
+        let nx3 = -hR * 6.5;
+        let ny3 = -hD * 6.5;
         let nz3 = 1;
         const invLen = 1 / Math.hypot(nx3, ny3, nz3);
         nx3 *= invLen;
@@ -65,10 +65,11 @@ class SandRenderer {
         nz3 *= invLen;
 
         const diffuse = Math.max(0, nx3 * lx + ny3 * ly + nz3 * lz);
-        const spec = Math.pow(Math.max(0, nx3 * 0.2 + ny3 * 0.15 + nz3 * 0.95), 28) * 0.35;
+        const spec = Math.pow(Math.max(0, nx3 * 0.2 + ny3 * 0.15 + nz3 * 0.95), 22) * 0.45;
         const grain = engine.noise[idx];
         const edge = dist > 0.92 ? (dist - 0.92) / 0.08 : 0;
-        const shade = 0.52 + diffuse * 0.42 + spec - edge * 0.25 + grain;
+        const mound = Math.max(0, hC) * 0.06;
+        const shade = 0.5 + diffuse * 0.48 + spec - edge * 0.25 + grain + mound;
 
         data[i] = Math.min(255, br * shade);
         data[i + 1] = Math.min(255, bg * shade);

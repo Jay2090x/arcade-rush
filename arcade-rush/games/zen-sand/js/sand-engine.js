@@ -110,6 +110,18 @@ class SandEngine {
     }
   }
 
+  pileStroke(x0, y0, x1, y1) {
+    const cfg = ZenConfig.PILE;
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const len = Math.hypot(dx, dy);
+    const steps = Math.max(1, Math.ceil(len / 3));
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      this.pileAt(x0 + dx * t, y0 + dy * t, cfg.dragStrength, cfg.dragRadius);
+    }
+  }
+
   pileAt(cx, cy, strength = ZenConfig.PILE.strength, radius = ZenConfig.PILE.radius) {
     const s = this.size;
     const r2 = radius * radius;
@@ -129,9 +141,12 @@ class SandEngine {
         const dy = y - cy;
         const d2 = dx * dx + dy * dy;
         if (d2 > r2) continue;
-        const falloff = 1 - Math.sqrt(d2) / radius;
+        const dist = Math.sqrt(d2);
+        const falloff = 1 - dist / radius;
+        const peak = Math.pow(Math.max(0, falloff), 1.35);
         const i = this.idx(x, y);
-        this.heights[i] += strength * falloff * falloff;
+        this.heights[i] += strength * peak;
+        this.heights[i] = Math.min(this.heights[i], 12);
       }
     }
   }

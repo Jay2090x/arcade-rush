@@ -17,7 +17,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
-  touch-action: none;
+  touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -25,13 +25,18 @@ html, body {
 #app {
   position: fixed;
   inset: 0;
+  z-index: 0;
 }
 
 #sand-canvas {
+  position: fixed;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  z-index: 0;
   cursor: crosshair;
+  touch-action: none;
 }
 
 .top-bar {
@@ -108,7 +113,8 @@ html, body {
   left: 50%;
   bottom: calc(max(18px, env(safe-area-inset-bottom)) + 88px);
   transform: translateX(-50%);
-  z-index: 11;
+  z-index: 50;
+  pointer-events: auto;
 }
 
 .btn-play {
@@ -117,6 +123,9 @@ html, body {
   gap: 10px;
   padding: 14px 28px;
   min-height: 52px;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   border: 1px solid rgba(201, 184, 150, 0.35);
   border-radius: 28px;
   background: linear-gradient(135deg, rgba(212, 196, 160, 0.95), rgba(184, 160, 120, 0.92));
@@ -174,7 +183,8 @@ html, body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 28px;
-  z-index: 10;
+  z-index: 50;
+  pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
 
