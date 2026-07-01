@@ -1,0 +1,30 @@
+name: Deploy to Netlify (when credits available)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8,20 * * *'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build static site
+        working-directory: arcade-rush
+        env:
+          URL: https://arcade-rush.netlify.app
+        run: bash scripts/prepare-deploy.sh
+
+      - name: Deploy to Netlify
+        working-directory: arcade-rush
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: 09cd607d-5a09-4f72-b45f-56747e35937a
+        run: |
+          npx --yes netlify-cli@17 deploy --prod --no-build --dir=. --message "auto static deploy"

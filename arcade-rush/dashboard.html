@@ -3,34 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arcade Rush — Stats</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/dashboard.css">
+  <title>Arcade Rush — Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <link rel="stylesheet" href="css/dashboard.css?v=2">
 </head>
 <body>
   <div class="dash">
-    <header>
-      <a href="index.html" class="back">← Arcade Rush</a>
-      <h1>📊 Statistik</h1>
-      <p class="sub">Anonyme Spielzahlen · lokal & global</p>
+    <header class="dash-header">
+      <div class="dash-header-top">
+        <a href="index.html" class="back">← Arcade Rush</a>
+        <div class="status" id="live-status">
+          <span class="status-dot"></span>
+          <span class="status-text">Lade Daten…</span>
+        </div>
+      </div>
+      <h1>Analytics Dashboard</h1>
+      <p class="sub">Besucher, Traffic-Quellen & Spielaktivität · anonym & DSGVO-freundlich</p>
+      <p class="updated" id="last-updated"></p>
     </header>
 
     <section class="kpi-grid" id="kpis"></section>
 
-    <section class="card">
-      <h2>📈 Übersicht</h2>
-      <div class="checklist" id="checklist"></div>
-    </section>
+    <div class="dash-grid">
+      <section class="card card-wide">
+        <div class="card-head">
+          <h2>📈 Besuche — letzte 7 Tage</h2>
+        </div>
+        <div class="chart-wrap" id="chart-7d"></div>
+      </section>
 
-    <section class="card">
-      <h2>📤 Daten</h2>
-      <p class="hint">Alle Daten anonym, gespeichert im Browser.</p>
-      <button class="btn" id="btn-export">JSON exportieren</button>
-      <button class="btn btn-secondary" id="btn-reset">Daten zurücksetzen</button>
-    </section>
+      <section class="card">
+        <div class="card-head">
+          <h2>🌍 Traffic-Quellen</h2>
+          <span class="badge" id="sources-total"></span>
+        </div>
+        <p class="hint">Woher kommen die Besucher? (Referrer, UTM, Direktaufruf)</p>
+        <div id="sources-table"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>🔗 Top Referrer</h2>
+        </div>
+        <p class="hint">Konkrete Websites, von denen Nutzer weitergeleitet wurden</p>
+        <div id="referrers-table"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>📣 UTM-Kampagnen</h2>
+        </div>
+        <p class="hint">Getrackte Links mit utm_source / medium / campaign</p>
+        <div id="utm-table"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>🗺️ Region & Sprache</h2>
+        </div>
+        <div class="split-panels">
+          <div id="countries-table"></div>
+          <div id="languages-table"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>📱 Geräte & Browser</h2>
+        </div>
+        <div class="split-panels">
+          <div id="devices-table"></div>
+          <div id="browsers-table"></div>
+        </div>
+      </section>
+
+      <section class="card card-wide">
+        <div class="card-head">
+          <h2>🎮 Spiele-Performance</h2>
+        </div>
+        <div id="games-table"></div>
+      </section>
+
+      <section class="card card-wide">
+        <div class="card-head">
+          <h2>📄 Top Seiten & Einstiegsseiten</h2>
+        </div>
+        <div class="split-panels">
+          <div id="pages-table"></div>
+          <div id="landing-table"></div>
+        </div>
+      </section>
+
+      <section class="card card-wide">
+        <div class="card-head">
+          <h2>⚡ Letzte Aktivität</h2>
+        </div>
+        <div class="activity-feed" id="activity-feed"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>💻 Dein Browser (lokal)</h2>
+        </div>
+        <p class="hint">Nur diese Session / dieses Gerät — zum Testen & Vergleich</p>
+        <div id="local-panel"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>📤 Export & Verwaltung</h2>
+        </div>
+        <p class="hint">Alle Daten anonym. Keine IPs, keine Namen.</p>
+        <div class="btn-row">
+          <button class="btn" id="btn-refresh">↻ Aktualisieren</button>
+          <button class="btn" id="btn-export-json">JSON</button>
+          <button class="btn btn-secondary" id="btn-export-csv">CSV (Quellen)</button>
+          <button class="btn btn-danger" id="btn-reset">Lokal löschen</button>
+        </div>
+      </section>
+    </div>
   </div>
 
-  <script src="js/analytics.js"></script>
-  <script src="js/dashboard.js"></script>
+  <script src="js/analytics.js?v=5"></script>
+  <script src="js/dashboard.js?v=2"></script>
 </body>
 </html>

@@ -1,8 +1,11 @@
-const { getStore } = require('@netlify/blobs');
+const { getStore, connectLambda } = require('@netlify/blobs');
 
 const STORE_NAME = 'arcade-rush-stats';
 
-function openStore(context) {
+function openStore(context, event) {
+  if (event?.blobs) {
+    connectLambda(event);
+  }
   const siteID = context?.site?.id || process.env.SITE_ID || process.env.NETLIFY_SITE_ID;
   const token = context?.netlify?.token || process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_PAT;
   if (siteID && token) {

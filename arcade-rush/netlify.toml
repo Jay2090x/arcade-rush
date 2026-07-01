@@ -1,11 +1,11 @@
 [build]
   publish = "."
-  command = "npm install && bash scripts/prepare-deploy.sh"
+  command = "bash scripts/prepare-deploy.sh"
 
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  external_node_modules = ["@netlify/blobs"]
+[[headers]]
+  for = "/dashboard.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 [[headers]]
   for = "/*"

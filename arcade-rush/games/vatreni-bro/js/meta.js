@@ -56,14 +56,28 @@ const Meta = {
   },
 
   dailyLabel(ch, lang) {
-    const de = GameI18n.lang === 'de';
+    const l = lang || GameI18n.lang;
     const labels = {
-      perfects: de ? `${ch.target} Perfect-Kopfbälle` : `${ch.target} perfect headers`,
-      score: de ? `${ch.target} Punkte erzielen` : `Score ${ch.target} points`,
-      combo: de ? `Combo ${ch.target} erreichen` : `Reach combo ${ch.target}`,
-      fever: de ? 'FEVER einmal auslösen' : 'Trigger FEVER once',
+      hr: {
+        perfects: `${ch.target} savršenih udaraca glavom`,
+        score: `Postigni ${ch.target} bodova`,
+        combo: `Dosegni combo ${ch.target}`,
+        fever: 'Aktiviraj FEVER jednom',
+      },
+      de: {
+        perfects: `${ch.target} Perfect-Kopfbälle`,
+        score: `${ch.target} Punkte erzielen`,
+        combo: `Combo ${ch.target} erreichen`,
+        fever: 'FEVER einmal auslösen',
+      },
+      en: {
+        perfects: `${ch.target} perfect headers`,
+        score: `Score ${ch.target} points`,
+        combo: `Reach combo ${ch.target}`,
+        fever: 'Trigger FEVER once',
+      },
     };
-    return labels[ch.track] || ch.track;
+    return labels[l]?.[ch.track] || labels.en[ch.track] || ch.track;
   },
 
   ensureDaily(stats) {
@@ -110,7 +124,7 @@ const Meta = {
   },
 
   async submitLeaderboard(entry) {
-    if (!entry.score || entry.score < 5) return;
+    if (!CONFIG.LEADERBOARD_URL || !entry.score || entry.score < 5) return;
     try {
       await fetch(`${CONFIG.LEADERBOARD_URL}?game=vatreni-bro`, {
         method: 'POST',
@@ -121,6 +135,7 @@ const Meta = {
   },
 
   async fetchLeaderboard() {
+    if (!CONFIG.LEADERBOARD_URL) return [];
     try {
       const res = await fetch(`${CONFIG.LEADERBOARD_URL}?game=vatreni-bro`);
       if (!res.ok) return [];

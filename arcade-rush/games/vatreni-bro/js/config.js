@@ -28,5 +28,5 @@ const CONFIG = {
   GROUND_H: 58,
   SLOWMO_TICKS: 12,
   SLOWMO_SCALE: 0.36,
-  LEADERBOARD_URL: '/.netlify/functions/leaderboard',
+  LEADERBOARD_URL: '',
 };
