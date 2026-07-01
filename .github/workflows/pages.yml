@@ -23,15 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Build site
         working-directory: arcade-rush
         env:
           URL: https://jay2090x.github.io/arcade-rush
-        run: npm install && bash scripts/prepare-deploy.sh
+        run: bash scripts/prepare-deploy.sh
 
       - uses: actions/upload-pages-artifact@v3
         with:

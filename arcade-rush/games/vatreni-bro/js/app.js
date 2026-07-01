@@ -16,18 +16,27 @@ const Tutorial = {
   },
 
   refreshSteps() {
-    const de = GameI18n.lang === 'de';
-    this.steps = de ? [
-      'Bro läuft selbst — warte bis er unter dem Ball ist.',
-      'Achte auf den goldenen PERFECT!-Ring.',
-      'Jetzt tippen! Triff PERFECT! für Bonuspunkte.',
-      'Perfects bauen Combos → FEVER ab 6! Ziel: 20 Punkte.',
-    ] : [
-      'Bro runs on his own — wait until he\'s under the ball.',
-      'Watch for the golden PERFECT! ring.',
-      'Tap now! Hit PERFECT! for bonus points.',
-      'Perfects build combos → FEVER at 6! Goal: 20 points.',
-    ];
+    const steps = {
+      hr: [
+        'Bro trči sam — čekaj dok nije ispod lopte.',
+        'Pazi na zlatni PERFECT! prsten.',
+        'Tapni sada! Pogodi PERFECT! za bonus bodove.',
+        'Perfecti grade combo → FEVER od 6! Cilj: 20 bodova.',
+      ],
+      de: [
+        'Bro läuft selbst — warte bis er unter dem Ball ist.',
+        'Achte auf den goldenen PERFECT!-Ring.',
+        'Jetzt tippen! Triff PERFECT! für Bonuspunkte.',
+        'Perfects bauen Combos → FEVER ab 6! Ziel: 20 Punkte.',
+      ],
+      en: [
+        'Bro runs on his own — wait until he\'s under the ball.',
+        'Watch for the golden PERFECT! ring.',
+        'Tap now! Hit PERFECT! for bonus points.',
+        'Perfects build combos → FEVER at 6! Goal: 20 points.',
+      ],
+    };
+    this.steps = steps[GameI18n.lang] || steps.hr;
   },
 
   isDone() {
@@ -83,7 +92,7 @@ const Share = {
     return [
       `Vatreni Bro 🔥🇭🇷 — ${Game.score} pts`,
       Game.bestCombo > 0 ? `Combo: ${Game.bestCombo}` : null,
-      GameI18n.lang === 'de' ? 'Schaffst du mehr?' : 'Can you beat me?',
+      GameI18n.t('share_beat'),
       url,
     ].filter(Boolean).join('\n');
   },
@@ -196,7 +205,7 @@ const UI = {
     });
 
     const action = (e) => {
-      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-share, .btn-lang, .back-arcade, .tutorial-skip, .tutorial-overlay')) return;
+      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-share, .btn-lang, .back-arcade, .go-game-card, .tutorial-skip, .tutorial-overlay')) return;
       Game.play();
     };
 
@@ -207,10 +216,19 @@ const UI = {
     const app = document.getElementById('app');
     app.addEventListener('click', action);
     app.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-share, .btn-lang, .back-arcade, .tutorial-skip, .tutorial-overlay')) return;
+      if (e.target.closest('.btn-sound, .btn-play, .btn-retry, .btn-share, .btn-lang, .back-arcade, .go-game-card, .tutorial-skip, .tutorial-overlay')) return;
       e.preventDefault();
       action(e);
     }, { passive: false });
+
+    document.querySelectorAll('.go-game-card').forEach(link => {
+      link.addEventListener('click', () => {
+        const game = link.dataset.game;
+        if (game && window.ArcadeAnalytics) {
+          ArcadeAnalytics.track('game_start', { game, from: 'vatreni-bro-promo' });
+        }
+      });
+    });
   },
 
   updateDaily() {

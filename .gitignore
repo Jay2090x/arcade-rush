@@ -3,3 +3,5 @@
 __pycache__/
 *.log
 .arcade-rush-site/
+# Local Netlify folder
+.netlify

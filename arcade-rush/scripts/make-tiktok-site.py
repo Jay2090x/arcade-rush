@@ -12,7 +12,7 @@ OUT_DIR = Path("/Users/josip/Downloads")
 FRAMES_DIR = OUT_DIR / "tiktok-site-frames"
 FINAL_MP4 = OUT_DIR / "tiktok-arcade-rush.mp4"
 FFMPEG = os.path.expanduser("~/.local/bin/ffmpeg")
-GAME_URL = "https://arcade-rush.netlify.app/games/vatreni-bro/"
+GAME_URL = "https://jay2090x.github.io/arcade-rush/games/vatreni-bro/"
 FPS = 30
 PART1_SEC = 4
 PART2_SEC = 15
@@ -115,7 +115,7 @@ GAME_SETUP_JS = r"""
   brand.innerHTML = `
     <div class="tt-pill">Schaffst du 20? 🔥🇭🇷</div>
     <div class="tt-sub">Kostenlos im Browser — kein Download</div>
-    <div class="tt-url">arcade-rush.netlify.app</div>
+    <div class="tt-url">jay2090x.github.io/arcade-rush</div>
   `;
   document.body.appendChild(brand);
 

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GAMES="$ROOT/games"
 PARENT="$(cd "$ROOT/.." && pwd)"
-SITE_URL="${URL:-${DEPLOY_PRIME_URL:-http://localhost:8888}}"
+SITE_URL="${URL:-https://jay2090x.github.io/arcade-rush}"
 SITE_URL="${SITE_URL%/}"
 
 copy_game() {
@@ -28,12 +28,19 @@ copy_game "goldgraeber" "$PARENT/goldgraeber-saga"
 copy_game "neon-stack" "$PARENT/neon-stack"
 copy_game "vatreni-bro" "$PARENT/vatreni-bro"
 
-# SEO: {{SITE_URL}} in HTML ersetzen (Netlify setzt URL beim Build)
-for html in "$ROOT/index.html" "$ROOT/datenschutz.html"; do
-  if [[ -f "$html" ]]; then
-    sed "s|{{SITE_URL}}|$SITE_URL|g" "$html" > "$html.tmp" && mv "$html.tmp" "$html"
-  fi
-done
+# SEO: URLs in allen HTML-Dateien auf Production-URL setzen
+fix_seo_urls() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  sed -e "s|{{SITE_URL}}|$SITE_URL|g" \
+      -e "s|http://localhost:8888|$SITE_URL|g" \
+      -e "s|https://arcade-rush.netlify.app|$SITE_URL|g" \
+      "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+}
+
+while IFS= read -r -d '' html; do
+  fix_seo_urls "$html"
+done < <(find "$ROOT" -name '*.html' -not -path '*/node_modules/*' -print0)
 
 # robots.txt
 cat > "$ROOT/robots.txt" << EOF

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vatreni Bro TikTok — Zoom auf Spieler, dann raus + Website-Einblendung."""
+"""Arcade Rush TikTok — Neon Stack (Bricks): 4s pur, dann 15s mit Website oben."""
 import os
 import shutil
 import subprocess
@@ -9,12 +9,12 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 OUT_DIR = Path("/Users/josip/Downloads")
-FRAMES_DIR = OUT_DIR / "tiktok-vatreni-bro-frames"
-FINAL_MP4 = OUT_DIR / "tiktok-vatreni-bro.mp4"
+FRAMES_DIR = OUT_DIR / "tiktok-neon-stack-frames"
+FINAL_MP4 = OUT_DIR / "tiktok-neon-stack.mp4"
 FFMPEG = os.path.expanduser("~/.local/bin/ffmpeg")
 GAME_URL = os.environ.get(
     "GAME_URL",
-    "http://127.0.0.1:8891/games/vatreni-bro/",
+    "http://127.0.0.1:8891/games/neon-stack/",
 )
 FPS = 30
 PART1_SEC = 4
@@ -27,26 +27,21 @@ GAME_SETUP_JS = r"""
   const style = document.createElement('style');
   style.id = 'tt-style';
   style.textContent = `
-    .overlay, .tutorial-overlay, .btn-lang, .btn-sound { display: none !important; }
-    #hud { opacity: 1 !important; z-index: 20; }
-    .hud-top .best-pill { display: none !important; }
-    .score-panel { margin-top: 88px !important; }
-    #app { overflow: hidden; position: relative; }
-    #game-canvas {
-      will-change: transform;
-      transform-origin: 50% 72%;
-    }
+    .overlay, .btn-sound { display: none !important; }
+    #hud { opacity: 1 !important; }
+    .best-hud { display: none !important; }
+    .score-wrap { margin-top: 72px !important; }
     .tt-safe-top {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 32%;
+      height: 34%;
       z-index: 9998;
       pointer-events: none;
       opacity: var(--tt-site-opacity, 0);
       transition: opacity 0.45s ease-out;
       background: linear-gradient(180deg,
-        rgba(6,12,28,0.82) 0%,
-        rgba(6,12,28,0.42) 58%,
+        rgba(8,10,30,0.88) 0%,
+        rgba(8,10,30,0.45) 58%,
         transparent 100%);
     }
     .tt-brand {
@@ -68,13 +63,13 @@ GAME_SETUP_JS = r"""
       text-align: center;
       padding: 12px 20px;
       border-radius: 16px;
-      background: linear-gradient(135deg, rgba(200,16,46,0.92), rgba(140,8,32,0.78));
+      background: linear-gradient(135deg, rgba(108,92,231,0.95), rgba(34,211,238,0.55));
       border: 1.5px solid rgba(255,255,255,0.22);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45);
     }
     .tt-sub {
       font: 700 14px/1.3 Outfit, system-ui, sans-serif;
-      color: #FFE082;
+      color: #a5f3fc;
       text-align: center;
       text-shadow: 0 2px 10px rgba(0,0,0,0.85);
     }
@@ -85,17 +80,17 @@ GAME_SETUP_JS = r"""
       padding: 9px 18px;
       border-radius: 999px;
       background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,224,130,0.42);
+      border: 1px solid rgba(167,139,250,0.45);
       backdrop-filter: blur(8px);
     }
     .tt-flash {
       position: fixed;
-      top: 42%;
+      top: 44%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.75);
       z-index: 9999;
       pointer-events: none;
-      font: 900 56px/1 Outfit, system-ui, sans-serif;
+      font: 900 52px/1 Outfit, system-ui, sans-serif;
       color: #FFD54F;
       opacity: 0;
       text-shadow: 0 0 32px rgba(255,213,79,0.95), 0 4px 20px rgba(0,0,0,0.9);
@@ -103,23 +98,25 @@ GAME_SETUP_JS = r"""
     }
     .tt-flash.show {
       opacity: 1;
-      transform: translate(-50%, -56%) scale(1.1);
+      transform: translate(-50%, -58%) scale(1.08);
     }
     #score.bump {
-      transform: scale(1.3) !important;
-      color: #FFE082 !important;
+      transform: scale(1.28) !important;
+      color: #67e8f9 !important;
       transition: transform 0.14s ease-out, color 0.14s;
     }
   `;
   document.head.appendChild(style);
 
-  document.body.appendChild(Object.assign(document.createElement('div'), { className: 'tt-safe-top' }));
+  const grad = document.createElement('div');
+  grad.className = 'tt-safe-top';
+  document.body.appendChild(grad);
 
   const brand = document.createElement('div');
   brand.className = 'tt-brand';
   brand.innerHTML = `
-    <div class="tt-pill">Možeš li 20? 🔥🇭🇷</div>
-    <div class="tt-sub">Besplatno u browseru — bez preuzimanja</div>
+    <div class="tt-pill">Wie hoch schaffst du? 🧱</div>
+    <div class="tt-sub">Neon Stack — gratis im Browser</div>
     <div class="tt-url">jay2090x.github.io/arcade-rush</div>
   `;
   document.body.appendChild(brand);
@@ -149,78 +146,47 @@ GAME_TICK_JS = r"""
   }
   document.documentElement.style.setProperty('--tt-site-opacity', String(siteOpacity));
 
-  const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
-  const zoomScale = (f) => {
-    const inStart = 24;
-    const inEnd = 54;
-    const holdEnd = 66;
-    const outEnd = 96;
-    const maxZ = 2.05;
-    if (f < inStart) return 1;
-    if (f < inEnd) return 1 + ease((f - inStart) / (inEnd - inStart)) * (maxZ - 1);
-    if (f < holdEnd) return maxZ;
-    if (f < outEnd) return maxZ - ease((f - holdEnd) / (outEnd - holdEnd)) * (maxZ - 1);
-    return 1;
-  };
-
-  const applyZoom = () => {
-    const canvas = document.getElementById('game-canvas');
-    if (!canvas || typeof Game === 'undefined' || !Game.player) return;
-    const head = Game.headPoint();
-    const rw = Game.renderer.w || canvas.width;
-    const rh = Game.renderer.h || canvas.height;
-    const ox = (head.x / rw) * 100;
-    const oy = (head.y / rh) * 100;
-    const z = zoomScale(frame);
-    canvas.style.transformOrigin = `${ox}% ${oy}%`;
-    canvas.style.transform = `scale(${z})`;
-  };
-
   const sync = () => {
     const f = document.getElementById('tt-flash');
     const s = document.getElementById('score');
+    const c = document.getElementById('combo');
     if (f) f.classList.toggle('show', tt.flash > 0);
     if (s) s.classList.toggle('bump', tt.bump > 0);
+    if (c && Game.combo > 1) c.textContent = `×${Game.combo}`;
   };
 
   if (typeof Game === 'undefined' || Game.state !== 'playing') {
-    applyZoom();
     sync();
-    return { score: 0, combo: 0, state: typeof Game !== 'undefined' ? Game.state : null, zoom: zoomScale(frame) };
+    return { score: 0, combo: 0, state: typeof Game !== 'undefined' ? Game.state : null };
   }
 
-  const ball = Game.ball;
-  const head = Game.headPoint();
-  if (Game.awaitingHeader && !Game.headerDone && ball.vy > 0) {
-    if (Game.perfectReady || (Game.headerReady && ball.y > head.y - 8)) {
-      Game.tryHeader();
+  if (Game.moving && Game.blocks.length) {
+    const prev = Game.blocks[Game.blocks.length - 1];
+    const offset = Math.abs(Game.moving.x - prev.x);
+    const movingToward = (prev.x - Game.moving.x) * Game.direction > 0;
+    if (movingToward && offset <= CONFIG.PERFECT_THRESHOLD + 2) {
+      Game.drop();
     }
   }
 
   Game.update();
-  Game.renderer.render(Game.getRenderState());
-  applyZoom();
+  Game.renderer.draw(Game.getRenderState());
 
   const score = Game.score;
   const combo = Game.combo;
   const el = document.getElementById('score');
-  const cel = document.getElementById('combo');
-  const mel = document.getElementById('mult-pill');
   if (el) el.textContent = String(score);
-  if (cel) cel.textContent = String(combo);
-  if (mel) mel.textContent = `x${Game.multiplier}`;
 
   if (score > window.__lastScore) {
     window.__lastScore = score;
-    tt.flash = 14;
+    tt.flash = 12;
     tt.bump = 8;
     const f = document.getElementById('tt-flash');
-    if (f) f.textContent = combo >= 3 ? `PERFECT ×${combo}` : 'PERFECT!';
+    if (f) f.textContent = combo > 1 ? `PERFECT ×${combo}` : 'PERFECT!';
   }
   window.__lastCombo = combo;
   sync();
-  return { score, combo, state: Game.state, zoom: zoomScale(frame) };
+  return { score, combo, state: Game.state };
 }
 """
 
@@ -230,8 +196,6 @@ GAME_START_JS = r"""
   Game.loopId = null;
   Game.start();
   Game.state = 'playing';
-  Game.resetEntities();
-  Game.ball.vy = 2.6;
   window.__lastScore = 0;
   window.__lastCombo = 0;
   window.__ttFrames = { flash: 0, bump: 0 };
@@ -239,13 +203,8 @@ GAME_START_JS = r"""
   document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
   document.getElementById('hud').classList.add('visible');
   document.getElementById('score').textContent = '0';
-  document.getElementById('combo').textContent = '0';
-  if (document.getElementById('mult-pill')) document.getElementById('mult-pill').textContent = 'x1';
-  const canvas = document.getElementById('game-canvas');
-  if (canvas) {
-    canvas.style.transform = 'scale(1)';
-    canvas.style.transformOrigin = '50% 72%';
-  }
+  const combo = document.getElementById('combo');
+  if (combo) combo.textContent = '';
 })();
 """
 
@@ -271,7 +230,6 @@ def render_frames():
 
         max_score = 0
         max_combo = 0
-        max_zoom = 1
         for i in range(TOTAL_FRAMES):
             result = page.evaluate(GAME_TICK_JS, i)
             if result.get("state") == "dead" and i > FPS * 2:
@@ -279,10 +237,9 @@ def render_frames():
                 result = page.evaluate(GAME_TICK_JS, i)
             max_score = max(max_score, result.get("score", 0))
             max_combo = max(max_combo, result.get("combo", 0))
-            max_zoom = max(max_zoom, result.get("zoom", 1))
             page.screenshot(path=str(FRAMES_DIR / f"frame_{i:04d}.png"))
 
-        print(f"  Max score: {max_score}  |  Max combo: {max_combo}  |  Peak zoom: {max_zoom:.2f}x")
+        print(f"  Max height: {max_score}  |  Max combo: {max_combo}")
         browser.close()
 
     return max_score, max_combo
@@ -296,7 +253,7 @@ def export_mp4():
         "-vf",
         "scale=1080:-2:force_original_aspect_ratio=increase,"
         "crop=1080:1920,"
-        "eq=brightness=0.04:contrast=1.06:saturation=1.14,"
+        "eq=brightness=0.04:contrast=1.08:saturation=1.18,"
         "unsharp=3:3:0.6:3:3:0.0,"
         "format=yuv420p",
         "-c:v", "libx264",
@@ -311,16 +268,16 @@ def export_mp4():
 
 def main():
     total = PART1_SEC + PART2_SEC
-    print(f"▶ Vatreni Bro TikTok — {TOTAL_FRAMES} frames ({total}s)")
-    print(f"  Zoom: Spieler ran (1–3.2s) → hold → raus (bis 3.2s)")
-    print(f"  Teil 2: Website-Einblendung ab 4s")
+    print(f"▶ Neon Stack TikTok — {TOTAL_FRAMES} frames ({total}s)")
+    print(f"  Teil 1: {PART1_SEC}s Gameplay (ohne Website)")
+    print(f"  Teil 2: {PART2_SEC}s Gameplay + Website oben")
     max_score, max_combo = render_frames()
     print("▶ Export MP4 …")
     export_mp4()
     shutil.rmtree(FRAMES_DIR, ignore_errors=True)
     size_mb = FINAL_MP4.stat().st_size / (1024 * 1024)
     print(f"✓ Fertig: {FINAL_MP4} ({size_mb:.1f} MB)")
-    print(f"  Peak: {max_score} pts · combo {max_combo}")
+    print(f"  Peak: {max_score} Blöcke · combo {max_combo}")
 
 
 if __name__ == "__main__":

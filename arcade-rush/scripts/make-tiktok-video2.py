@@ -12,7 +12,7 @@ OUT_DIR = Path("/Users/josip/Downloads")
 FRAMES_DIR = OUT_DIR / "tiktok-video2-frames"
 FINAL_MP4 = OUT_DIR / "tiktok-video2-sky-drift.mp4"
 FFMPEG = os.path.expanduser("~/.local/bin/ffmpeg")
-URL = "https://arcade-rush.netlify.app/games/sky-drift/"
+URL = "https://jay2090x.github.io/arcade-rush/games/sky-drift/"
 FPS = 25
 DURATION_SEC = 16
 TOTAL_FRAMES = FPS * DURATION_SEC
@@ -62,7 +62,7 @@ SETUP_JS = """
   document.body.appendChild(hook);
   const url = document.createElement('div');
   url.className = 'tt-url';
-  url.textContent = 'arcade-rush.netlify.app';
+  url.textContent = 'jay2090x.github.io/arcade-rush';
   document.body.appendChild(url);
   const plus = document.createElement('div');
   plus.className = 'tt-plus';

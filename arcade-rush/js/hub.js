@@ -1,16 +1,12 @@
 const ADMIN_KEY = 'arcade_admin_unlock';
 const ADMIN_TAPS = 5;
 const ADMIN_WINDOW_MS = 2500;
-const SHARE_URL = 'https://arcade-rush.netlify.app/';
+const SHARE_URL = ((window.SITE_CONFIG && window.SITE_CONFIG.siteUrl) || 'https://jay2090x.github.io/arcade-rush').replace(/\/?$/, '/') ;
 
 document.addEventListener('DOMContentLoaded', () => {
   HubI18n.init();
   ArcadeAnalytics.init();
   initShare();
-
-  setTimeout(() => {
-    ArcadeAnalytics.fetchGlobalCounts();
-  }, 800);
 
   document.querySelectorAll('.game-card[data-game]').forEach(card => {
     card.addEventListener('click', () => {
