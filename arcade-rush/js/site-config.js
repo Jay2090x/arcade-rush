@@ -5,6 +5,6 @@ window.SITE_CONFIG = {
   // Google Analytics 4 (kostenlos): https://analytics.google.com → Property → Mess-ID
   ga4: '',
 
-  // GoatCounter (kostenlos, datenschutzfreundlich): https://www.goatcounter.com
-  goatCounter: '',
+  // GoatCounter — Dashboard: https://arcaderush.goatcounter.com/
+  goatCounter: 'https://arcaderush.goatcounter.com/count',
 };

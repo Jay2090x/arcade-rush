@@ -6,3 +6,5 @@ __pycache__/
 # Local Netlify folder
 .netlify
 netlify-manual-deploy.zip
+arcade-rush/goatcounter-credentials.txt
+arcade-rush/goatcounter-credentials.png
