@@ -27,4 +27,4 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: 09cd607d-5a09-4f72-b45f-56747e35937a
         run: |
-          npx --yes netlify-cli@17 deploy --prod --no-build --dir=. --message "auto static deploy"
+          npx --yes netlify-cli@17 deploy --prod --dir=. --message "auto static deploy"
