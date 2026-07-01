@@ -5,3 +5,4 @@ __pycache__/
 .arcade-rush-site/
 # Local Netlify folder
 .netlify
+netlify-manual-deploy.zip
